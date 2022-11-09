@@ -1,0 +1,55 @@
+{
+  "author": "",
+  "bugs": {},
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.2.0",
+    "bootstrap": "^5.2.2",
+    "dropzone": "^6.0.0-beta.2",
+    "ethers": "^5.7.2",
+    "mithril": "^2.2.2",
+    "requirejs": "^2.3.6",
+    "tweetnacl": "^1.0.3"
+  },
+  "description": "",
+  "gxDependencies": [
+    {
+      "hash": "QmQF4NV3sSPm7cjMYms4xDgoLwqMXrcz8YyMcdw1N4mKbb",
+      "name": "libipfs",
+      "version": "1.0.1"
+    },
+    {
+      "hash": "QmRVeioew7NfqCrQ72oetE2vcXPW9Fp7vRCDcwaMk4Biko",
+      "name": "libwip2p",
+      "version": "0.2.4"
+    },
+    {
+      "hash": "QmTZPJgb4oZN5TX2vwjpyKK1rKUBBuAUvBsqi6UYGf4J3t",
+      "name": "wip2p-settings",
+      "version": "0.1.8"
+    },
+    {
+      "hash": "QmSBEFqR4udFheAUp1fJ1cWZ9qbr9qs3SDLhuZtWK9SUMt",
+      "name": "ethereum-blockies",
+      "version": "1.0.2"
+    }
+  ],
+  "gxVersion": "0.14.0",
+  "license": "ISC",
+  "main": "index.js",
+  "name": "cheese",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "web-dev": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000",
+    "web": "devserver -r src --b 0.0.0.0:7000",
+    "web-dist": "devserver -b 0.0.0.0:7000 -r build --nogx",
+    "build": "node bundle.js",
+    "publish": "ipfs add -r build"
+  },
+  "version": "0.0.1",
+  "devDependencies": {
+    "mkdirp": "^1.0.4",
+    "mv": "^2.1.1",
+    "ncp": "^2.0.0",
+    "uglify-es": "^3.3.9"
+  }
+}

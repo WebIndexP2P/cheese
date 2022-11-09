@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="mobile-web-app-capable" content="yes">
+
+        <link href="css/app.css" rel="stylesheet" type="text/css" />
+
+        <link rel="shortcut icon" type="image/png" href="assets/cheese_192_round.png"/>
+        <link rel="apple-touch-icon" type="image/png" href="assets/cheese_192_square.png"/>
+
+        <link href="manifest.json" rel="manifest">
+
+        <title>Cheese</title>
+    </head>
+<body>
+
+    <div id="app"></div>
+
+    <div class="loader">
+        <img id="apploaderimg" src="" style="height:64px;width:64px;">
+        <div>Loading... (<span id="assetCount">0</span> of <span id="assetTotal">..</span>)</div>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="modal">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+          </div>
+        </div>
+    </div>
+
+    <script>
+
+        function isES6()
+        {
+          try
+          {
+              Function("() => {};"); return true;
+          }
+          catch(exception)
+          {
+              return false;
+          }
+        }
+
+        var addAsset = function(location, callback) {
+            if (location.substring(location.length - 4) == ".css") {
+                var fileref = document.createElement("link");
+                fileref.rel = "stylesheet";
+                fileref.type = "text/css";
+                fileref.href = location;
+                document.getElementsByTagName("head")[0].appendChild(fileref)
+
+                callback();
+            } else {
+                var fileref = document.createElement("script");
+                fileref.type = "text/javascript";
+                fileref.src = location;
+                fileref.onload = function(loadEvent) {
+                    callback(location);
+                }
+                document.getElementsByTagName("body")[0].appendChild(fileref)
+            }
+        }
+
+        var assets = [
+            "npm/bootstrap/dist/css/bootstrap.min.css",
+            "npm/@fortawesome/fontawesome-free/css/fontawesome.min.css",
+            "npm/@fortawesome/fontawesome-free/css/solid.min.css",
+            "npm/dropzone/dist/dropzone.css",
+
+            "npm/bootstrap/dist/js/bootstrap.bundle.min.js",
+            "npm/dropzone/dist/dropzone-min.js",
+            "npm/mithril/mithril.min.js",
+            "npm/tweetnacl/nacl.min.js",
+            "npm/ethers/dist/ethers.umd.min.js",
+            "gx/libipfs/libipfs.min.js",
+            "gx/libwip2p/libwip2p.js",
+            "npm/requirejs/require.js",
+
+            //<!--{REPLACEWITH_APPBUNDLE}-->
+        ]
+
+        document.getElementById('assetTotal').innerText = assets.length;
+
+        var loaderimg = document.getElementById('apploaderimg');
+        loaderimg.onload = function(e) {
+            // load all css async
+            // load all js sync, order is important
+            var assetIndex = 0;
+
+            var onAssetsComplete = function() {
+                requirejs(['index'], function(Index) {})
+            }
+            var onLoadComplete = function(location) {
+                assetIndex++;
+                document.getElementById('assetCount').innerText = assetIndex;
+                if (assetIndex < assets.length)
+                    addAsset(assets[assetIndex], onLoadComplete);
+                else
+                    onAssetsComplete();
+            }
+            addAsset(assets[assetIndex], onLoadComplete);
+        }
+
+        if (isES6()) {
+          loaderimg.src = "assets/cheese_192_round.png";
+        } else {
+          document.getElementsByTagName('body')[0].textContent = "Your browser does not support ES6. Try a modern browser such as Brave, Chrome, Firefox or DuckDuckGo.";
+        }
+
+    </script>
+
+</body>
+</html>
