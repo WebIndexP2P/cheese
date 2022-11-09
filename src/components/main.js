@@ -33,7 +33,7 @@ define([
     oninit: (vnode)=>{
 
       Loader.subscribeToUpdates(function(account){
-        console.log('loaded ' + account)
+        //console.log('loaded ' + account)
         m.redraw();
       })
 

@@ -41,11 +41,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "web-dev": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000",
     "web": "devserver -r src --b 0.0.0.0:7000",
-    "web-dist": "devserver -b 0.0.0.0:7000 -r build --nogx",
+    "web-build": "devserver -b 0.0.0.0:7000 -r build --nogx",
     "build": "node bundle.js",
     "publish": "ipfs add -r build"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "devDependencies": {
     "mkdirp": "^1.0.4",
     "mv": "^2.1.1",

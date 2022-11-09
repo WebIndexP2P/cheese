@@ -150,7 +150,13 @@ define([
     })
     .catch((err)=>{
       console.log('loader -> fetch error for ' + account)
-      console.error(err)
+      if (err == 'account not found') {
+        console.log('loader.networkFetch() -> ' + err)
+      } else if (err.hasOwnProperty('message') && err.message == 'CBOR decode error: too many terminals, data makes no sense'){
+        console.log('loader.networkFetch() -> ' + err.message)
+      } else {
+        console.error(err)
+      }
 
       if (reloadCurrentAccount) {
         reloadCurrentAccount = false;
@@ -160,13 +166,17 @@ define([
         }
       }
 
-      content[account] = null;
+      if (err == 'account not found') {
+        content[account] = err;
+      } else {
+        content[account] = null;
+      }
 
       var callbacks = requestQueueMap[account];
 
       if (callbacks != null) {
         for (var a = 0; a < callbacks.length; a++) {
-          callbacks[a][1]({state: "error", msg: err});
+          callbacks[a][1]({state: "error", msg: err}).catch(()=>{});
         }
       }
       delete requestQueueMap[account];
@@ -203,12 +213,13 @@ define([
     .then((session)=>{
       if (session.connState != 4)
         throw 'not connected';
-      return session.sendMessage({method:"bundle_getBySequence", params: [ 0 ]})
+      return session.sendMessage({method:"bundle_getRecent", params: []})
     })
     .then((response)=>{
       for (var a = 0; a < response.result.length; a++) {
-        console.log('add requestQueue ' + response.result[a].account);
-        requestQueue.push(response.result[a].account);
+        let tmpAcct = response.result[a][0];
+        console.log('add requestQueue ' + tmpAcct);
+        requestQueue.push(tmpAcct);
       }
       if (!isLoading && requestQueue.length > 0) {
         let nextAccount = requestQueue.shift();

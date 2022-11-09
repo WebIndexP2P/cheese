@@ -355,6 +355,10 @@ define(()=>{
     var db = new CheeseDb();
     db.owner = owner.toLowerCase();
 
+    if (data == null) {
+      return db;
+    }
+
     if (data.ni != null) {
       db.nextAlbumId = data.ni;
     }

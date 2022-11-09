@@ -6,14 +6,16 @@ define([
   'lib/cheesedb',
   'lib/cheesestate',
   'components/cidimage',
-  'components/selectableimagegrid'
+  'components/selectableimagegrid',
+  'gx/wip2p-settings/src/publishcallback'
 ], (
   Loader,
   Utils,
   CheeseDb,
   CheeseState,
   CidImage,
-  SelectableImageGrid
+  SelectableImageGrid,
+  PublishCallback
 )=>{
 
   var resizePhoto = (fileDataB64) => {
@@ -149,6 +151,16 @@ define([
       // first we fetch our account and get the cheeseDb
       Loader.fetchOne(libwip2p.Account.getWallet().address)
       .then((result)=>{
+        if (result.msg == "account not found" || result.db == "account not found") {
+          PublishCallback.setOnPublishCallback(function(){
+            Loader.fetchOne(libwip2p.Account.getWallet().address, true)
+            .then((result)=>{
+              m.route.set("/editalbum");
+            })
+          })
+          m.route.set("/settings?tab=invites");
+          return;
+        }
         if (result.db != null) {
           vnode.state.myCheeseDb = result.db;
         } else {
