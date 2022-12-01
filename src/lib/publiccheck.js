@@ -39,10 +39,11 @@ define([
       }
     })
     .catch((err)=>{
+      console.log(err)
       if (err == 'account has not posted anything') {
-        console.log(err)
+      } else if (err == "unauthorized"){
+        m.route.set("/settings?tab=invites");
       } else {
-        console.error(err)
       }
     })
   };

@@ -195,6 +195,21 @@ define([
 
   var fetchSequential = function(callback) {
     //console.log('fetch sequential accounts');
+    var processResults = function(response) {
+      let lastSeqNo;
+      for (var a = 0; a < response.result.length; a++) {
+        let tmpAcct = response.result[a].account;
+        console.log('add requestQueue ' + tmpAcct);
+        requestQueue.push(tmpAcct);
+        lastSeqNo = response.result[a].seqNo;
+      }
+      if (!isLoading && requestQueue.length > 0) {
+        let nextAccount = requestQueue.shift();
+        fetchOne(nextAccount)
+      }
+      return lastSeqNo;
+    }
+
     new Promise((resolve, reject)=>{
       // ensure we have a connection
       if (libwip2p.Peers.getConnState() != 4) {
@@ -213,17 +228,16 @@ define([
     .then((session)=>{
       if (session.connState != 4)
         throw 'not connected';
-      return session.sendMessage({method:"bundle_getRecent", params: []})
+      // call getBySequence twice for at most (2x10) accounts
+      return session.sendMessage({method:"bundle_getBySequence", params: [0]})
     })
     .then((response)=>{
-      for (var a = 0; a < response.result.length; a++) {
-        let tmpAcct = response.result[a][0];
-        console.log('add requestQueue ' + tmpAcct);
-        requestQueue.push(tmpAcct);
-      }
-      if (!isLoading && requestQueue.length > 0) {
-        let nextAccount = requestQueue.shift();
-        fetchOne(nextAccount)
+      let lastSeqNo = processResults(response);
+      if (response.result.length == 10) {
+        return session.sendMessage({method:"bundle_getBySequence", params: [lastSeqNo + 1]})
+        .then((response)=>{
+          processResults(response);
+        })
       }
     })
   }
