@@ -7,7 +7,8 @@ define([
   'lib/cheesestate',
   'components/cidimage',
   'components/selectableimagegrid',
-  'gx/wip2p-settings/src/publishcallback'
+  'gx/wip2p-settings/src/publishcallback',
+  "geoshare/geoshare/src/lib/geosharedb"
 ], (
   Loader,
   Utils,
@@ -15,7 +16,8 @@ define([
   CheeseState,
   CidImage,
   SelectableImageGrid,
-  PublishCallback
+  PublishCallback,
+  GeoShareDb
 )=>{
 
   var resizePhoto = (fileDataB64) => {
@@ -139,6 +141,13 @@ define([
     return {cid: cid, buf: myFileData};
   }
 
+  var onMapClick = function(vnode, featureSet, e) {
+    e.preventDefault();
+
+    vnode.state.draftAlbum.setMapId(featureSet.id);
+    vnode.state.chosenMapText = featureSet.name;
+  }
+
   return {
 
     oninit: (vnode)=>{
@@ -147,6 +156,8 @@ define([
       vnode.state.draftAlbum = new CheeseDb.Album();
       vnode.state.pageTitle = null;
       vnode.state.myDropzone = null;
+      vnode.state.myGeoShareDb = null;
+      vnode.state.chosenMapText = "No map selected";
 
       // first we fetch our account and get the cheeseDb
       Loader.fetchOne(libwip2p.Account.getWallet().address)
@@ -183,6 +194,17 @@ define([
 
         //console.log(vnode.state.myCheeseDb)
         //console.log(vnode.state.draftAlbum)
+        return GeoShareDb.fetch(libwip2p.Account.getWallet().address)
+      })
+      .then((result)=>{
+        vnode.state.myGeoShareDb = result;
+        for (let a = 0; a < result.featureSets.length; a++) {
+          if (vnode.state.draftAlbum.mapId == result.featureSets[a].id) {
+            vnode.state.chosenMapText = result.featureSets[a].name;
+            break;
+          }
+        }
+        m.redraw();
       })
     },
 
@@ -284,6 +306,21 @@ define([
               m("input.form-control", {"type":"date", value: vnode.state.draftAlbum.date, onchange: function(e){
                 vnode.state.draftAlbum.date = e.target.value;
               }})
+            ),
+            m("div.mb-3",
+              m("label.form-label", "Map"),
+              m("div.dropdown",
+                m("button.btn btn-outline-secondary dropdown-toggle", {"data-bs-toggle":"dropdown"}, vnode.state.chosenMapText),
+                m("ul.dropdown-menu",
+                  (function(){
+                    if (vnode.state.myGeoShareDb != null) {
+                      return vnode.state.myGeoShareDb.featureSets.map((fs)=>{
+                        return m("li", m("a.dropdown-item", {href:"#", onclick:onMapClick.bind(null, vnode, fs)}, m("i.fa fa-map-location"), " ", fs.name))
+                      })
+                    }
+                  })()
+                )
+              )
             ),
             m("div.row mb-3",
               m("div.col-12",

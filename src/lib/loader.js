@@ -210,6 +210,7 @@ define([
       return lastSeqNo;
     }
 
+    let session;
     new Promise((resolve, reject)=>{
       // ensure we have a connection
       if (libwip2p.Peers.getConnState() != 4) {
@@ -225,7 +226,8 @@ define([
       }
     })
     .then(libwip2p.Peers.getActivePeerSession)
-    .then((session)=>{
+    .then((_session)=>{
+      session = _session;
       if (session.connState != 4)
         throw 'not connected';
       // call getBySequence twice for at most (2x10) accounts

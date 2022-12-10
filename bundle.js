@@ -21,6 +21,7 @@ var filesToCopy = [
     {type:"file", src: "src/index.html", dst: "index.html"},
     {type:"file", src: "src/service-worker.js", dst: "service-worker.js"},
     {type:"file", src: "src/manifest.json", dst: "manifest.json"},
+    {type:"file", src: "src/world.geojson.compressed", dst: "world.geojson.compressed"},
 
     {type:"file", src: "src/css/app.css", dst: "css/app.css"},
     {type:"file", src: "src/assets/cheese_192_round.png", dst: "assets/cheese_192_round.png"},
@@ -37,6 +38,14 @@ var filesToCopy = [
 
     {type:"file", src: "/node_modules/dropzone/dist/dropzone.css", dst: "/npm/dropzone/dist/dropzone.css"},
     {type:"file", src: "/node_modules/dropzone/dist/dropzone-min.js", dst: "/npm/dropzone/dist/dropzone-min.js"},
+
+    {type:"file", src: "/node_modules/leaflet/dist/leaflet.css", dst:"/npm/leaflet/dist/leaflet.css"},
+    {type:"file", src: "/node_modules/leaflet/dist/leaflet.js", dst:"/npm/leaflet/dist/leaflet.js"},
+    {type:"file", src: "/node_modules/leaflet/dist/images/marker-icon-2x.png", dst:"/npm/leaflet/dist/images/marker-icon-2x.png"},
+    {type:"file", src: "/node_modules/leaflet/dist/images/marker-icon.png", dst:"/npm/leaflet/dist/images/marker-icon.png"},
+    {type:"file", src: "/node_modules/leaflet/dist/images/marker-shadow.png", dst:"/npm/leaflet/dist/images/marker-shadow.png"},
+
+    {type:"file", src: "/node_modules/fflate/umd/index.js", dst:"/npm/fflate/umd/index.js"},
 
     {type:"file", src: "/node_modules/mithril/mithril.min.js", dst: "/npm/mithril/mithril.min.js"},
 

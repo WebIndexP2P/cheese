@@ -3,16 +3,45 @@
 define([
   'lib/loader',
   'lib/cheesedb',
-  'components/cidimage'
+  'components/cidimage',
+  'geoshare/geoshare/src/lib/geosharedb',
+  'geoshare/geoshare/src/lib/mapstate'
 ], (
   Loader,
   CheeseDb,
-  CidImage
+  CidImage,
+  GeoShareDb,
+  MapState
 )=>{
+
+  var loadMapData = function(vnode, address, mapId) {
+    let mainFeatureSet;
+    return GeoShareDb.fetch(address)
+    .then((result)=>{
+      vnode.state.myGeoShareDb = result;
+      for (let a = 0; a < result.featureSets.length; a++) {
+        if (mapId == result.featureSets[a].id) {
+          mainFeatureSet = result.featureSets[a]
+          break;
+        }
+      }
+      return vnode.state.myGeoShareDb.fetchFeatureSetGeoJson(mainFeatureSet)
+    })
+    .then(async (result)=>{
+      MapState.addFeatureSets('local', [ result ])
+      MapState.zoomTo(result);
+      for (let a = 0; a < mainFeatureSet.offlineMaps.length; a++) {
+        let offlineMapId = mainFeatureSet.offlineMaps[a];
+        let offlineFeatureSet = vnode.state.myGeoShareDb.getFeatureSetById(offlineMapId);
+        await vnode.state.myGeoShareDb.fetchFeatureSetGeoJson(offlineFeatureSet);
+      }
+    })
+  }
 
   return {
     oninit: function(vnode) {
       vnode.state.targetAlbum = new CheeseDb.Album();
+      vnode.state.mapActivated = false;
 
       let targetAlbumId = m.route.param().albumid;
       vnode.state.targetAlbumId = targetAlbumId;
@@ -24,7 +53,21 @@ define([
       .then((result)=>{
         vnode.state.targetAlbum = result.db.getAlbumById(targetAlbumId);
         m.redraw();
+        if (vnode.state.targetAlbum.mapId != null) {
+          loadMapData(vnode, decodedAlbumId.address, vnode.state.targetAlbum.mapId);
+        }
       })
+    },
+
+    onupdate: (vnode)=>{
+      if (vnode.state.targetAlbum.mapId != null && !vnode.state.mapActivated) {
+        vnode.state.mapActivated = true;
+        MapState.init(document.getElementById('mymap'));
+        MapState.invalidateSize();
+      }
+      if (vnode.state.mapActivated) {
+        MapState.invalidateSize();
+      }
     },
 
     view: function(vnode) {
@@ -49,6 +92,13 @@ define([
           )
         ),
         m("div.row.mb-3",
+          (function(){
+            if (vnode.state.targetAlbum.mapId != null) {
+              return m("div.col-12 col-lg-6 mb-3",
+                m("div", {id:"mymap", style:"border:1px solid;position:relative;height:100%;min-height:300px;width:100%;"})
+              )
+            }
+          })(),
           (function(){
             let photos = [];
             for (var a = 0; a < vnode.state.targetAlbum.photos.length; a++) {

@@ -71,6 +71,7 @@ define(()=>{
     this.sortDate = null;
     this.cover = null;
     this.photos = [];
+    this.mapId = null;
 
     Object.seal(this);
     return this;
@@ -143,6 +144,10 @@ define(()=>{
     return pending;
   }
 
+  Album.prototype.setMapId = function(id) {
+    this.mapId = id;
+  }
+
   Album.prototype.export = function() {
     let obj = {}
 
@@ -168,6 +173,9 @@ define(()=>{
       for (var a = 0; a < this.photos.length; a++) {
         obj.p[a] = this.photos[a].export();
       }
+    }
+    if (this.mapId != null) {
+      obj.m = this.mapId;
     }
 
     return obj;
@@ -203,6 +211,9 @@ define(()=>{
         }
         tmpAlbum.photos[a] = tmpPhoto;
       }
+    }
+    if (data.m != null) {
+      tmpAlbum.mapId = data.m;
     }
 
     return tmpAlbum;
