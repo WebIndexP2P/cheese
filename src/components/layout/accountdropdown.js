@@ -1,9 +1,13 @@
 'use strict'
 
 define([
-    'gx/ethereum-blockies/blockies.min'
+    'gx/ethereum-blockies/blockies.min',
+    'lib/cheesestate',
+    'lib/loader'
 ], function(
-    MakeBlockies
+    MakeBlockies,
+    CheeseState,
+    Loader
 ) {
 
     var showAccount = function(vnode, e) {
@@ -74,6 +78,9 @@ define([
                 libwip2p.Account.newWallet()
                 .then(()=>{
                   vnode.state.account = libwip2p.Account.getWallet().address;
+                  CheeseState.reset();
+                  Loader.fetchSequential();
+                  m.route.set("/");
                   m.redraw();
                 })
             } else if (nextStep == 'restore') {
@@ -141,11 +148,26 @@ define([
       var bSuccess = libwip2p.Account.restoreWallet(seed, false);
 
       if (bSuccess) {
-          vnode.state.account = libwip2p.Account.getWallet().address;
-          var myModal = bootstrap.Modal.getInstance(document.getElementById('modal'));
-          myModal.hide();
+        vnode.state.account = libwip2p.Account.getWallet().address;
+        var myModal = bootstrap.Modal.getInstance(document.getElementById('modal'));
+        myModal.hide();
+        CheeseState.reset();
+        libwip2p.Peers.getActivePeerSession()
+        .then((session)=>{
+          session.disconnect();
+          return libwip2p.Peers.connect();
+        })
+        .then(()=>{
+          return Loader.fetchOne(vnode.state.account)
+        })
+        .catch((err)=>{})
+        .then((result)=>{
+            Loader.fetchSequential();
+            m.route.set("/");
+            m.redraw();
+        })
       } else {
-          document.getElementById('seedTextarea').classList.add('is-invalid');
+        document.getElementById('seedTextarea').classList.add('is-invalid');
       }
     }
 

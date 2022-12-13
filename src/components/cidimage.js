@@ -49,7 +49,8 @@ define([
       let props = {
         src: vnode.state.imageSrc,
         class: vnode.attrs.class,
-        width:"100%"
+        width:"100%",
+        style:"cursor:pointer;"
       }
 
       if (vnode.attrs.onclick) {
@@ -58,7 +59,7 @@ define([
 
       if (vnode.attrs.normalizeHeight) {
         props.height = "100%";
-        props.style = "object-fit: cover;max-height:200px;";
+        props.style += "object-fit: cover;max-height:200px;";
       }
 
       if (vnode.attrs.enableFullzoom) {

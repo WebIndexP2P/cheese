@@ -50,8 +50,14 @@ define(()=>{
     return albums;
   }
 
+  var reset = function() {
+    publishers = {}
+    albums = []
+  }
+
   return {
     process: process,
+    reset: reset,
     getAlbumsPaged: getAlbumsPaged
   };
 

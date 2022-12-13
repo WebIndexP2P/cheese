@@ -54,3 +54,15 @@ div.table .file-row > div {
 div.table .file-row:nth-child(odd) {
   background: #f9f9f9;
 }
+a.nostyle:link {
+   text-decoration: inherit;
+   color: inherit;
+}
+
+a.nostyle:visited {
+   text-decoration: inherit;
+   color: inherit;
+}
+a.full-width {
+   width: 100%
+}
