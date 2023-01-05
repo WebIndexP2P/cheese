@@ -1,5 +1,5 @@
 'use strict';
 
 define(function() {
-    return "0.0.5";
+    return "0.0.6";
 })

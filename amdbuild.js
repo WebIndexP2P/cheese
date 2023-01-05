@@ -5,7 +5,7 @@
     optimize: "none",
     paths: {
       "gx/ethereum-blockies": "empty:",
-      "gx/wip2p-settings": "../vendor/gx/ipfs/QmUKJPDyRAYMhLsWQbKKvR5jExL5yimzi6uAmfyZkLxie7/wip2p-settings",
+      "gx/wip2p-settings": "../vendor/gx/ipfs/QmdLCQmUHtPQS6AihZfXbJFSBjXXejS6oQoQypvTv7MGjs/wip2p-settings",
       "geoshare/geoshare": "../../geoshare"
     }
 })

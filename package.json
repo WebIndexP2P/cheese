@@ -26,14 +26,14 @@
       "version": "1.0.1"
     },
     {
-      "hash": "QmYZ4WZ8Ta6Q1UvBKW23pBKhsXNbDifQtsjWwqnJTuViYZ",
+      "hash": "QmYCAycf4Ap7aDPy6pNEzyn2YtY5cEVBLbjxLNkNqEcxwi",
       "name": "libwip2p",
-      "version": "0.2.5"
+      "version": "0.2.7"
     },
     {
-      "hash": "QmUKJPDyRAYMhLsWQbKKvR5jExL5yimzi6uAmfyZkLxie7",
+      "hash": "QmdLCQmUHtPQS6AihZfXbJFSBjXXejS6oQoQypvTv7MGjs",
       "name": "wip2p-settings",
-      "version": "0.1.11"
+      "version": "0.1.12"
     },
     {
       "hash": "QmSBEFqR4udFheAUp1fJ1cWZ9qbr9qs3SDLhuZtWK9SUMt",
@@ -46,15 +46,15 @@
   "main": "index.js",
   "name": "cheese",
   "scripts": {
-    "clean": "rimraf build",
     "build": "node bundle.js",
     "car": "../go-car/cmd/car/car c -o cheese.car build/*",
+    "clean": "rimraf build",
     "publish": "ipfs add -r build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "web": "devserver -r src --b 0.0.0.0:7000 -include geoshare/geoshare:../geoshare",
     "web-build": "devserver -b 0.0.0.0:7000 -r build --nogx",
     "web-dev": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000"
   },
-  "version": "0.0.5"
+  "version": "0.0.6"
 }
 
