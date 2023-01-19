@@ -1,6 +1,6 @@
 "use strict";
 
-var cachedVersion = '';
+var cachedVersion = 'tmp'; // tmp will force a cache reset..
 
 self.addEventListener("install", function(event) {
 
@@ -83,10 +83,10 @@ self.addEventListener("fetch", function(event) {
       }
     })
     .then((newVersion)=>{
-      console.log('detected version "' + newVersion + '"');
-      if (newVersion == '' || newVersion == null)
-        newVersion = 'noversion';
+      if (newVersion == '')
+        newVersion = 'develop';
       if (newVersion != cachedVersion) {
+        console.log('erasing old app cache');
         return caches.keys()
         .then(function (keys) {
           return Promise.all(
@@ -94,7 +94,6 @@ self.addEventListener("fetch", function(event) {
               return !key.startsWith(newVersion);
             })
             .map(function (key) {
-              console.log('erasing old app cache -> ' + key);
               return caches.delete(key);
             })
           );
@@ -122,4 +121,34 @@ self.addEventListener("fetch", function(event) {
 
 self.addEventListener("activate", function(event) {
   console.log('WORKER: activate event in progress.');
+  clients.claim();
+
+  /*event.waitUntil(
+    caches.keys()
+    .then(function (keys) {
+      return Promise.all(
+        keys.filter(function (key) {
+          return !key.startsWith(version);
+        })
+        .map(function (key) {
+          return caches.delete(key);
+        })
+      );
+    })
+    .then(function() {
+      console.log('WORKER: activate completed.');
+    })
+  );*/
 });
+
+self.addEventListener("message", (event)=>{
+  if (event.data == "clearAssets") {
+    console.log("clearing all assets");
+    caches.keys()
+    .then(function (keys) {
+      for (var a = 0; a < keys.length; a++ ) {
+        caches.delete(keys[a]);
+      }
+    })
+  }
+})

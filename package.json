@@ -26,14 +26,14 @@
       "version": "1.0.1"
     },
     {
-      "hash": "QmYCAycf4Ap7aDPy6pNEzyn2YtY5cEVBLbjxLNkNqEcxwi",
+      "hash": "Qmd59EykWWhDFyNd9NqibXGoGWHnrhUWhymtH4kDJe4hXM",
       "name": "libwip2p",
-      "version": "0.2.7"
+      "version": "0.2.11"
     },
     {
-      "hash": "QmdLCQmUHtPQS6AihZfXbJFSBjXXejS6oQoQypvTv7MGjs",
+      "hash": "QmVUur7hc5ivPfnojuhJg86gfezh2SHx7eE5TJt6xobGnQ",
       "name": "wip2p-settings",
-      "version": "0.1.12"
+      "version": "0.1.14"
     },
     {
       "hash": "QmSBEFqR4udFheAUp1fJ1cWZ9qbr9qs3SDLhuZtWK9SUMt",
@@ -55,6 +55,6 @@
     "web-build": "devserver -b 0.0.0.0:7000 -r build --nogx",
     "web-dev": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000"
   },
-  "version": "0.0.6"
+  "version": "0.0.7"
 }
 

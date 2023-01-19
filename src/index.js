@@ -110,6 +110,15 @@ define([
     // load the UI
     var a = document.getElementById('app');
 
+    let settingsConfig = {
+      hideEth: true,
+      hideIpfs: true,
+      name:"Cheese",
+      version: "v" + Version,
+      description: m("span", " is a peer-to-peer photo sharing app. All data is stored in ", m("a[href='https://wip2p.eth.link']", {target:"_blank"}, "WebIndexP2P"), " nodes run by volunteers."),
+      icon:"assets/cheese_192_round.png"
+    }
+
     m.route(a, "/", {
       "/": {render: function() {
         return m(PageLayout, {}, m(PageMain))
@@ -124,14 +133,10 @@ define([
         return m(PageLayout, {}, m(PageViewAlbum, {key: m.route.param("albumid")}))
       }},
       "/settings": {render: function() {
-          return m(PageLayout, {}, m(PageSettings, {
-            hideEth: true,
-            hideIpfs: true,
-            name:"Cheese",
-            version: "v" + Version,
-            description: m("span", " is a peer-to-peer photo sharing app. All data is stored in ", m("a[href='https://wip2p.eth.link']", {target:"_blank"}, "WebIndexP2P"), " nodes run by volunteers."),
-            icon:"assets/cheese_192_round.png"
-          }))
+          return m(PageLayout, {}, m(PageSettings, settingsConfig))
+      }},
+      "/settings/:tab": {render: function() {
+        return m(PageLayout, {}, m(PageSettings, settingsConfig))
       }},
     })
 
