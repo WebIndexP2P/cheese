@@ -20,9 +20,27 @@ define([
           } else {
             vnode.state.error = true;
           }
+
           m.redraw();
         })
       }
+    },
+
+    onupdate: (vnode)=>{
+      if (vnode.attrs.resizePortrait) {
+        vnode.instance.dom.classList.remove('landscape');
+        vnode.instance.dom.classList.remove('portrait');
+
+        //console.log(vnode.instance.dom.clientWidth/vnode.instance.dom.clientHeight)
+        if (vnode.instance.dom.clientWidth/vnode.instance.dom.clientHeight > 1) {
+          vnode.instance.dom.classList.add('landscape');
+        } else {
+          vnode.instance.dom.classList.add('portrait');
+          if (vnode.attrs.fullscreen && window.innerWidth >= 576) {
+            vnode.instance.dom.style.height = "90vh"
+          }
+        }
+      }      
     },
 
     view: (vnode)=>{
@@ -48,9 +66,13 @@ define([
 
       let props = {
         src: vnode.state.imageSrc,
-        class: vnode.attrs.class,
-        width:"100%",
-        style:"cursor:pointer;"
+        class: vnode.attrs.class,        
+        style:"cursor:pointer;",
+        cid: vnode.attrs.cid
+      }
+
+      if (!vnode.attrs.resizePortrait) {
+        props.width = "100%"
       }
 
       if (vnode.attrs.onclick) {
@@ -62,31 +84,12 @@ define([
         props.style += "object-fit: cover;max-height:200px;";
       }
 
-      if (vnode.attrs.enableFullzoom) {
-        if ('ontouchstart' in window) {
-          props.onclick = null;
-          props.ontouchstart = function(e) {
-            window.pendingTouchEvent = new Date();
-          }
-          props.ontouchend = function(e){
-            if (document.fullscreenElement != null) {
-              document.webkitExitFullscreen();
-              return;
-            }
-            let dif = new Date() - window.pendingTouchEvent;
-            if (dif < 50) {
-              e.srcElement.webkitRequestFullscreen();
-            }
-          }
-        } else {
-          props.onclick = vnode.attrs.onclick;
-        }
+      if (vnode.attrs.isGallery) {
+        props.style = "height:200px;width:100%;object-fit:cover;"
       }
 
-
-
-      if (vnode.attrs.fullSize) {
-        props.height = "100%";
+      props.onload = ()=>{
+        //console.log('loaded ' + vnode.attrs.cid)
       }
 
       return m("img", props);

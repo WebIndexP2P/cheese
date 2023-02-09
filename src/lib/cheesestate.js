@@ -1,12 +1,18 @@
 'use strict';
 
-define(()=>{
+define([
+  'lib/loader',
+], (
+  Loader
+)=>{
 
-  var publishers = {} // []address
+  var publishers = {} // {}address
   var albums = [] // []albums, sorted by album date
 
+  var linkedDocRequests = {} // {account: {cid: true}}
+
   var process = function(address, cheeseDb) {
-    console.log('process ' + address)
+    //console.log('process ' + address)
     address = address.toLowerCase();
 
     if (publishers.hasOwnProperty(address)) {
@@ -46,8 +52,39 @@ define(()=>{
     return detectedAccounts;
   }
 
-  var getAlbumsPaged = function(pageOffset, numPerPage) {
-    return albums;
+  var getAlbumsPaged = function(page, numPerPage) {
+    let offset = (page - 1) * numPerPage
+    let tmpAlbums = albums.slice(offset, offset + numPerPage);
+
+    // attempt to load any linked photocollection docs
+    for (let a = 0; a < tmpAlbums.length; a++) {
+      if (tmpAlbums[a]._photosCid != null && tmpAlbums[a].photos == null) {
+
+        let tmpCid = tmpAlbums[a]._photosCid.toString();
+        //console.log(tmpAlbums[a])
+        let bFound = false;
+        if (linkedDocRequests.hasOwnProperty(tmpAlbums[a].owner)) {
+          if (linkedDocRequests[tmpAlbums[a].owner].hasOwnProperty(tmpCid) == false) {
+            linkedDocRequests[tmpAlbums[a].owner][tmpCid] = true;
+            bFound = true;
+          }
+        } else {
+          linkedDocRequests[tmpAlbums[a].owner] = {}
+          linkedDocRequests[tmpAlbums[a].owner][tmpCid] = true;
+          bFound = true;
+        }
+        if (bFound) {
+          Loader.fetchCid(tmpAlbums[a].owner, tmpCid)
+          .then((result)=>{
+            //console.log(result)
+            m.redraw()
+          })
+        }
+      }
+    }
+
+    let pages = Math.ceil(albums.length / numPerPage)
+    return {albums: tmpAlbums, pages: pages};
   }
 
   var reset = function() {

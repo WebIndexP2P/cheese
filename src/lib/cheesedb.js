@@ -11,7 +11,8 @@ define(()=>{
     this.title = null;
     this.description = null;
     this.date = null;
-    this.upload = false;
+
+    this._upload = false;
 
     Object.seal(this);
     return this;
@@ -23,7 +24,7 @@ define(()=>{
     if (this.cid == null) {
       throw new Error('cid cannot be null');
     } else {
-      obj.c = {"/": this.cid.toString()};
+      obj.c = this.cid;
     }
     if (this.title != null) {
       obj.t = this.title;
@@ -45,7 +46,7 @@ define(()=>{
       console.log('skipping photo with missing cid')
       return;
     } else {
-      tmpPhoto.cid = data.c["/"];
+      tmpPhoto.cid = data.c;
     }
     if (data.t != null) {
       tmpPhoto.title = data.t;
@@ -70,8 +71,11 @@ define(()=>{
     this.date = null;
     this.sortDate = null;
     this.cover = null;
-    this.photos = [];
+    this.photos = null;
     this.mapId = null;
+
+    this._photosCid = null;
+    this._linkedPhotosUpload = false;
 
     Object.seal(this);
     return this;
@@ -88,10 +92,9 @@ define(()=>{
     let p = new Photo();
     p.cid = photoCidAndBuf.cid;
     p.buf = photoCidAndBuf.buf;
-    p.upload = true;
+    p._upload = true;
     if (photoCidAndBuf.title != null) {
       p.title = photoCidAndBuf.title;
-      let datePart;
       let pos = p.title.search(/_[0-9]{8}_/)
       if (pos >= 0) {
         pos++;
@@ -110,7 +113,7 @@ define(()=>{
   }
 
   Album.prototype.getCoverImageCid = function() {
-    if (this.photos.length > 0 && this.photos[0] != null && this.photos[0].hasOwnProperty('cid')) {
+    if (this.photos != null && this.photos.length > 0 && this.photos[0] != null && this.photos[0].hasOwnProperty('cid')) {
       return this.photos[0].cid;
     } else {
       return null;
@@ -137,7 +140,7 @@ define(()=>{
   Album.prototype.getPendingPhotosToUpload = function() {
     let pending = [];
     for (var a = 0; a < this.photos.length; a++) {
-      if (this.photos[a].upload) {
+      if (this.photos[a]._upload) {
         pending.push(this.photos[a].buf);
       }
     }
@@ -148,7 +151,7 @@ define(()=>{
     this.mapId = id;
   }
 
-  Album.prototype.export = function() {
+  Album.prototype.export = function(asLinked) {
     let obj = {}
 
     if (this.id == null) {
@@ -173,6 +176,11 @@ define(()=>{
       for (var a = 0; a < this.photos.length; a++) {
         obj.p[a] = this.photos[a].export();
       }
+      if (asLinked) {
+        let ls = new libwip2p.LinkedSet();
+        ls.update("/", obj.p)
+        obj.p = ls.rootNode.cid;
+      }
     }
     if (this.mapId != null) {
       obj.m = this.mapId;
@@ -181,7 +189,20 @@ define(()=>{
     return obj;
   }
 
+  Album.prototype.exportPhotosAsEncodedCbor = function() {
+    let tmpPhotos = [];
+    for (var a = 0; a < this.photos.length; a++) {
+      tmpPhotos.push(this.photos[a].export());
+    }
+    let ls = new libwip2p.LinkedSet();
+    ls.update("/", tmpPhotos)
+    return ls.rootNode.docBytes;
+  }
+
   Album.import = function(data) {
+
+    //console.log('Album->import()')
+
     let tmpAlbum = new Album();
 
     if (data.i == null) {
@@ -202,14 +223,20 @@ define(()=>{
     if (data.c != null) {
       tmpAlbum.cover = data.c;
     }
-    if (data.hasOwnProperty('p') && data.p.length > 0) {
-      tmpAlbum.photos = [];
-      for (var a = 0; a < data.p.length; a++) {
-        let tmpPhoto = Photo.import(data.p[a]);
-        if (tmpPhoto == null) {
-          continue;
-        }
-        tmpAlbum.photos[a] = tmpPhoto;
+    if (data.hasOwnProperty('p')) {
+      if (typeof data.p == 'object') {
+        if ('asCID' in data.p) {
+          tmpAlbum._photosCid = data.p;
+        } else {
+          tmpAlbum.photos = [];
+          for (var prop in data.p) {
+            let tmpPhoto = Photo.import(data.p[prop]);
+            if (tmpPhoto == null) {
+              continue;
+            }
+            tmpAlbum.photos.push(tmpPhoto);
+          }
+        }        
       }
     }
     if (data.m != null) {
@@ -226,9 +253,9 @@ define(()=>{
 
     this.owner = null;
     this.albums = [];
-    this.avatar = null;
-    this.name = null;
     this.nextAlbumId = 1;
+
+    this._exportAsLinkedNamespace = false;
 
     Object.seal(this);
     return this;
@@ -236,6 +263,16 @@ define(()=>{
 
   CheeseDb.prototype.setOwner = function(address) {
     this.owner = address;
+  }
+
+  CheeseDb.prototype.setExportAsLinkedNamespace = function() {
+    this._exportAsLinkedNamespace = true;
+  }
+
+  CheeseDb.prototype.flagAllLinkedPhotosForUpload = function() {
+    for (var a = 0; a < this.albums.length; a ++) {
+      this.albums[a]._linkedPhotosUpload = true; 
+    }
   }
 
   CheeseDb.prototype.getAlbumById = function(albumId) {
@@ -278,28 +315,38 @@ define(()=>{
     return pending;
   }
 
+  CheeseDb.prototype.getPendingPhotoCollectionsToUpload = function() {
+    let pending = [];
+    for (var a = 0; a < this.albums.length; a++) {
+      if (this.albums[a]._linkedPhotosUpload) {
+        pending.push(this.albums[a].exportPhotosAsEncodedCbor())
+      }      
+    }
+    return pending;
+  }
+
   CheeseDb.prototype.export = function() {
     let obj = {}
     if (this.albums.length > 0) {
       obj.a = [];
       for (var i = 0; i < this.albums.length; i++) {
-        obj.a[i] = this.albums[i].export();
+        let exportedAlbum = this.albums[i].export(this._exportAsLinkedNamespace);
+        obj.a[i] = exportedAlbum
       }
     }
     obj.ni = this.nextAlbumId;
     return obj;
   }
 
-  CheeseDb.prototype.publish = function(owner) {
-    if (owner == null)
+  CheeseDb.prototype.publish = function() {
+    if (this.owner == null)
       throw 'no owner set';
 
-    var bs = new libwip2p.BranchSet();
-    var sigBundle;
-    bs.address = owner;
+    var ls = new libwip2p.LinkedSet();
+    ls.address = this.owner;
     var newDb = this.export();
     //console.log(newDb)
-    return bs.FetchByAccount(owner, "/cheese")
+    return ls.fetch(this.owner, "/cheese")
     .catch((err)=>{
       if (err == 'account has not posted anything' || err == 'path doesnt exist') {
 
@@ -308,21 +355,27 @@ define(()=>{
       }
     })
     .then(()=>{
-      return bs.Update("/cheese", newDb, true);
+      ls.update("/cheese", newDb, {createMissing: true})   
+      if (this._exportAsLinkedNamespace) {
+        ls.linkify("/cheese")
+      }
+      //console.log(ls)
+      //throw 'stop'
+      return ls.sign()
     })
     .then(()=>{
-      return bs.sign();
-    })
-    .then(()=>{
-      sigBundle = bs.exportSigBundle();
+      let newPhotoCollectionsToUpload = this.getPendingPhotoCollectionsToUpload();
+      for (let a = 0; a < newPhotoCollectionsToUpload.length; a++) {
+        ls.addCachedDoc(newPhotoCollectionsToUpload[a]);
+      }
+
       let newPhotosToUpload = this.getPendingPhotosToUpload();
-      sigBundle.cborData = sigBundle.cborData.concat(newPhotosToUpload);
-      return libwip2p.Peers.getActivePeerSession();
-    })
-    .then((session)=>{
-      if (session.connState != 4)
-        throw 'not connected';
-      return session.doBundlePublish(sigBundle);
+      for (let a = 0; a < newPhotosToUpload.length; a++) {
+        ls.addCachedDoc(newPhotosToUpload[a]);
+      }
+      //console.log(ls)
+      //throw 'stop'
+      return ls.publish();
     })
     .then((response)=>{
       if (response.result) {
@@ -335,34 +388,23 @@ define(()=>{
 
   CheeseDb.Album = Album;
 
-  CheeseDb.fetch = function(address) {
-    return new Promise((resolve, reject)=>{
-      // ensure we have a connection
-      if (libwip2p.Peers.getConnState() != 4) {
-        // subscribe to connection event
-        libwip2p.Peers.events.on("connstatechange", function(state){
-          if (state == 4) {
-            resolve();
-          }
-        })
-        // maybe a timeout??
-      } else {
-        resolve();
-      }
+  /*CheeseDb.fetch = function(address) {
+    let ls = new libwip2p.LinkedSet();
+    return ls.fetch(address, "/cheese")
+    .then((rawCheeseDb)=>{
+      var db = CheeseDb.import(address, rawCheeseDb)
+      return {appDb: db, linkedSet: ls};
     })
-    .then(()=>{
-      var bs = new libwip2p.BranchSet();
-      return bs.FetchByAccount(address, "/cheese")
-      .then(async (rawCheeseDb)=>{
-        var db = CheeseDb.import(address, rawCheeseDb)
-        return db;
-      })
-    })
-  }
+  }*/
 
-  CheeseDb.import = function(owner, data) {
+  CheeseDb.import = function(linkedSet) {
     //console.log('CheeseDb.import() -> ')
-    //console.log(data)
+    //console.log(linkedSet)
+    //console.log(CheeseDb.getNamespace())
+
+    let owner = linkedSet.address;
+    let data = linkedSet.getContentByPath(CheeseDb.getNamespace())
+
     var db = new CheeseDb();
     db.owner = owner.toLowerCase();
 
@@ -377,7 +419,7 @@ define(()=>{
     if (data.a == null) {
       db.albums = [];
     } else {
-      for (var a = 0; a < data.a.length; a++) {
+      for (let a = 0; a < data.a.length; a++) {
         let tmpAlbum = Album.import(data.a[a]);
         if (tmpAlbum == null) {
           continue;
@@ -388,6 +430,10 @@ define(()=>{
     }
 
     return db;
+  }
+
+  CheeseDb.getNamespace = function() {
+    return "/cheese"
   }
 
   return CheeseDb;

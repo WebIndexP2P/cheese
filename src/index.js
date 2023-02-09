@@ -10,6 +10,7 @@ define([
   'components/disconnectmodal',
   'components/editalbum',
   'components/viewalbum',
+  'components/cheesesettings',
   'lib/loader',
   'lib/cheesedb',
   'lib/cheesestate',
@@ -24,6 +25,7 @@ define([
   DisconnectModal,
   PageEditAlbum,
   PageViewAlbum,
+  CheeseSettings,
   Loader,
   CheeseDb,
   CheeseState,
@@ -102,7 +104,7 @@ define([
       libwip2p.Peers.getActivePeerSession()
       .then((ps)=>{
         ps.onBundleReceived = function(bundle){
-          Loader.fetchOne(bundle.account, true);
+          Loader.fetchOne(bundle.account, "/", true);
         }
       })
     })
@@ -115,12 +117,16 @@ define([
       hideIpfs: true,
       name:"Cheese",
       version: "v" + Version,
-      description: m("span", " is a peer-to-peer photo sharing app. All data is stored in ", m("a[href='https://wip2p.eth.link']", {target:"_blank"}, "WebIndexP2P"), " nodes run by volunteers."),
-      icon:"assets/cheese_192_round.png"
+      description: m("span", " is a peer-to-peer photo sharing app. All data is stored in ", m("a[href='http://wip2p.com']", {target:"_blank"}, "WebIndexP2P"), " nodes run by volunteers."),
+      icon:"assets/cheese_192_round.png",
+      additionalTabs: [{key:"cheese", name:"Cheese", vnode: CheeseSettings}]
     }
 
     m.route(a, "/", {
       "/": {render: function() {
+        return m(PageLayout, {}, m(PageMain))
+      }},
+      "/page/:page": {render: function() {
         return m(PageLayout, {}, m(PageMain))
       }},
       "/editalbum": {render: function() {

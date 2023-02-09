@@ -24,7 +24,7 @@ define([
           mainFeatureSet = result.featureSets[a]
           break;
         }
-      }
+      }      
       return vnode.state.myGeoShareDb.fetchFeatureSetGeoJson(mainFeatureSet)
     })
     .then(async (result)=>{
@@ -52,6 +52,16 @@ define([
       Loader.fetchOne(decodedAlbumId.address)
       .then((result)=>{
         vnode.state.targetAlbum = result.db.getAlbumById(targetAlbumId);
+        if (vnode.state.targetAlbum.photos == null) {
+          Loader.fetchCid(decodedAlbumId.address, vnode.state.targetAlbum._photosCid.toString())
+          .then((result)=>{
+            Loader.fetchOne(decodedAlbumId.address)
+            .then((result)=>{
+              vnode.state.targetAlbum = result.db.getAlbumById(targetAlbumId);
+              m.redraw()
+            })
+          })
+        }
         m.redraw();
         if (vnode.state.targetAlbum.mapId != null) {
           loadMapData(vnode, decodedAlbumId.address, vnode.state.targetAlbum.mapId);
@@ -101,6 +111,9 @@ define([
           })(),
           (function(){
             let photos = [];
+            if (vnode.state.targetAlbum.photos == null) {
+              return;
+            }
             for (var a = 0; a < vnode.state.targetAlbum.photos.length; a++) {
               let photo = vnode.state.targetAlbum.photos[a];
               if (photo == null) {
@@ -117,17 +130,21 @@ define([
                 desc = photo.description;
               }
               photos.push(m("div.col-12 col-lg-6 mb-3",
-                m(CidImage, {cid :photo.cid.toString(), enableFullzoom: true, onclick: function(){
-                  let pm = {view: ()=>m(CidImage, {fullSize: true, cid :photo.cid.toString()})}
-                  document.getElementsByClassName('modal-content')[0].parentElement.classList.add('modal-xl')
-                  document.getElementById('modal').addEventListener('hidden.bs.modal', function(){
-                    document.getElementsByClassName('modal-content')[0].parentElement.classList.remove('modal-xl')
-                  })
-                  m.mount(document.getElementsByClassName('modal-content')[0], pm);
-                  var myModal = new bootstrap.Modal(document.getElementById('modal'));
-                  myModal.show();
-                  document.getElementsByClassName('modal-backdrop')[0].style.opacity = "0.9";
-                }}),
+                m("div",
+                  m(CidImage, {key: photo.cid.toString(), cid :photo.cid.toString(), resizePortrait: true, onclick: function(){
+                    let pm = {view: ()=>m("div", {style:"text-align:center;"}, 
+                      m(CidImage, {resizePortrait: true, fullscreen: true, cid :photo.cid.toString()})
+                    )}
+                    document.getElementById('modalPhotoContent').parentElement.classList.add('modal-xl')
+                    document.getElementById('modal').addEventListener('hidden.bs.modal', function(){
+                      //document.getElementsByClassName('modal-content')[0].parentElement.classList.remove('modal-xl')
+                    })
+                    m.mount(document.getElementById('modalPhotoContent'), pm);
+                    var myModal = new bootstrap.Modal(document.getElementById("modalPhotoview"));
+                    myModal.show();
+                    document.getElementsByClassName('modal-backdrop')[0].style.opacity = "0.9";
+                  }})
+                ),
                 m("div", m("span", {style:"font-size:12px;font-weight:bold;"}, photo.title), m("span.float-end", {style:"font-size:12px;font-weight:bold;"}, photo.date)),
                 desc
               ))

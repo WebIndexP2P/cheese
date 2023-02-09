@@ -2,8 +2,8 @@
   "author": "",
   "bugs": {},
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.2.0",
-    "bootstrap": "^5.2.2",
+    "@fortawesome/fontawesome-free": "^6.2.1",
+    "bootstrap": "^5.2.3",
     "dropzone": "^6.0.0-beta.2",
     "ethers": "^5.7.2",
     "fflate": "^0.7.4",
@@ -26,14 +26,14 @@
       "version": "1.0.1"
     },
     {
-      "hash": "Qmd59EykWWhDFyNd9NqibXGoGWHnrhUWhymtH4kDJe4hXM",
+      "hash": "QmRpVsfz9LRwqq2E48PPRAaW7D9iDBEXDdAHmg9pa9Xmbp",
       "name": "libwip2p",
-      "version": "0.2.11"
+      "version": "0.2.19"
     },
     {
-      "hash": "QmVUur7hc5ivPfnojuhJg86gfezh2SHx7eE5TJt6xobGnQ",
+      "hash": "Qmcp4zywB3EGek5SAgYBgEKTtJfSjMZX4W3LJw2AJhyxGs",
       "name": "wip2p-settings",
-      "version": "0.1.14"
+      "version": "0.1.18"
     },
     {
       "hash": "QmSBEFqR4udFheAUp1fJ1cWZ9qbr9qs3SDLhuZtWK9SUMt",
@@ -53,8 +53,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "web": "devserver -r src --b 0.0.0.0:7000 -include geoshare/geoshare:../geoshare",
     "web-build": "devserver -b 0.0.0.0:7000 -r build --nogx",
-    "web-dev": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000"
+    "web-dev": "devserver -r src --include geoshare/geoshare:../geoshare,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000",
+    "web-dev2": "devserver -r src --include geoshare/geoshare:../geoshare,gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000"
   },
-  "version": "0.0.7"
+  "version": "0.1.0"
 }
 
