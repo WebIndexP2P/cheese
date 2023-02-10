@@ -4,8 +4,6 @@ define([
   'lib/loader',
   'lib/utils',
   'lib/cheesedb',
-  'lib/cheesestate',
-  'components/cidimage',
   'components/selectableimagegrid',
   'gx/wip2p-settings/src/publishcallback',
   "geoshare/geoshare/src/lib/geosharedb"
@@ -13,8 +11,6 @@ define([
   Loader,
   Utils,
   CheeseDb,
-  CheeseState,
-  CidImage,
   SelectableImageGrid,
   PublishCallback,
   GeoShareDb
@@ -104,10 +100,10 @@ define([
     cidNode.parentNode.removeChild(cidNode.nextElementSibling)
 
     calcCid(myFileData)
-    .then((result)=>{
-      result.title = file.name;
-      vnode.state.draftAlbum.addPhotoForUpload(result);
-      cidNode.innerHTML = result.cid.toString();
+    .then((results)=>{
+      let newPhoto = {title: file.name, cid: results.cid, buf: results.pbBuf}
+      vnode.state.draftAlbum.addPhotoForUpload(newPhoto);
+      cidNode.innerHTML = results.cid.toString();
     })
 
     //m.redraw();
@@ -133,12 +129,12 @@ define([
     var pbStruct = {Data: file.marshal(), Links:[]}
     var pbBuf = dagPB.encode(pbStruct)
 
-    var myFileData = Buffer.from(pbBuf).toString("base64");
-
     // hash then construct CID
     let digest = sha256.digest(pbBuf)
     var cid = CID.create(0, dagPB.code, digest)
-    return {cid: cid, buf: myFileData};
+
+    pbBuf = Buffer.from(pbBuf)
+    return {cid: cid, pbBuf: pbBuf};
   }
 
   var onMapClick = function(vnode, featureSet, e) {
@@ -269,7 +265,7 @@ define([
           ),
           m("div.col-3 col-md-3 col-lg-4 col-xxl-5", {style:"display:inline-block;left:0px;right:0px;overflow:hidden;"},
             m("p.name", {"data-dz-name":true, style:"margin-bottom:0px;"},
-              m("div.cid", {style:"font-size:14px;"}, "...")
+              m("div.cid", {style:"font-size:12px;"}, "...")
             ),
             m("strong.error text-danger", {"data-dz-errormessage":true})
           ),
@@ -334,10 +330,13 @@ define([
                   }
                   vnode.state.myCheeseDb.publish(libwip2p.Account.getWallet().address)
                   .then((result)=>{
-                    return Loader.fetchOne(libwip2p.Account.getWallet().address, true);
+                    return Loader.fetchOne(libwip2p.Account.getWallet().address, {replaceCache: true});
                   })
                   .then((result)=>{
                     m.route.set("/");
+                  })
+                  .catch((err)=>{
+                    console.error(err)
                   })
                 }}, m("i.fa fa-save"), " Publish album"),
                 (function(){
@@ -346,7 +345,7 @@ define([
                       vnode.state.myCheeseDb.deleteAlbum(vnode.state.draftAlbum.id)
                       vnode.state.myCheeseDb.publish(libwip2p.Account.getWallet().address)
                       .then((result)=>{
-                        return Loader.fetchOne(libwip2p.Account.getWallet().address, true);
+                        return Loader.fetchOne(libwip2p.Account.getWallet().address, {replaceCache: true});
                       })
                       .then(()=>{
                         m.route.set("/");

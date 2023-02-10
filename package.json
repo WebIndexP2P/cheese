@@ -26,9 +26,9 @@
       "version": "1.0.1"
     },
     {
-      "hash": "QmRpVsfz9LRwqq2E48PPRAaW7D9iDBEXDdAHmg9pa9Xmbp",
+      "hash": "QmbwjW1uMEc3CeT2F5vsV3tBQGZ6Qhmpmi1R2oqSshP8FW",
       "name": "libwip2p",
-      "version": "0.2.19"
+      "version": "0.2.20"
     },
     {
       "hash": "Qmcp4zywB3EGek5SAgYBgEKTtJfSjMZX4W3LJw2AJhyxGs",
@@ -56,6 +56,6 @@
     "web-dev": "devserver -r src --include geoshare/geoshare:../geoshare,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000",
     "web-dev2": "devserver -r src --include geoshare/geoshare:../geoshare,gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000"
   },
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
 

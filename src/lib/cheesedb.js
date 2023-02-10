@@ -71,11 +71,12 @@ define(()=>{
     this.date = null;
     this.sortDate = null;
     this.cover = null;
-    this.photos = null;
+    this.photos = [];
     this.mapId = null;
 
     this._photosCid = null;
     this._linkedPhotosUpload = false;
+    this._linkedPhotosFetched = false;
 
     Object.seal(this);
     return this;
@@ -89,6 +90,7 @@ define(()=>{
     if (photoCidAndBuf.cid == null || photoCidAndBuf.buf == null) {
       throw new Error("invalid photo data");
     }
+
     let p = new Photo();
     p.cid = photoCidAndBuf.cid;
     p.buf = photoCidAndBuf.buf;
@@ -109,7 +111,17 @@ define(()=>{
         }
       }
     }
+
     this.photos.push(p);
+
+    let photoCollection = [];
+    for (var a = 0; a < this.photos.length; a++) {
+      photoCollection.push(this.photos[a].export())
+    }
+    let ls = new libwip2p.LinkedSet();
+    ls.update("/", photoCollection)
+    this._photosCid = ls.rootNode.cid;
+    this._linkedPhotosUpload = true;
   }
 
   Album.prototype.getCoverImageCid = function() {
@@ -151,7 +163,7 @@ define(()=>{
     this.mapId = id;
   }
 
-  Album.prototype.export = function(asLinked) {
+  Album.prototype.export = function() {
     let obj = {}
 
     if (this.id == null) {
@@ -171,17 +183,18 @@ define(()=>{
     if (this.cover != null) {
       obj.c = this.cover;
     }
-    if (this.photos.length > 0) {
-      obj.p = [];
-      for (var a = 0; a < this.photos.length; a++) {
-        obj.p[a] = this.photos[a].export();
-      }
-      if (asLinked) {
-        let ls = new libwip2p.LinkedSet();
-        ls.update("/", obj.p)
-        obj.p = ls.rootNode.cid;
+
+    if (this._photosCid != null) {
+      obj.p = this._photosCid;
+    } else {
+      if (this.photos.length > 0) {
+        obj.p = [];
+        for (var a = 0; a < this.photos.length; a++) {
+          obj.p[a] = this.photos[a].export();
+        }
       }
     }
+
     if (this.mapId != null) {
       obj.m = this.mapId;
     }
@@ -199,7 +212,7 @@ define(()=>{
     return ls.rootNode.docBytes;
   }
 
-  Album.import = function(data) {
+  Album.import = function(data, dataResolved) {
 
     //console.log('Album->import()')
 
@@ -225,18 +238,18 @@ define(()=>{
     }
     if (data.hasOwnProperty('p')) {
       if (typeof data.p == 'object') {
-        if ('asCID' in data.p) {
+        if (data.p[Symbol.toStringTag] == "CID") {
           tmpAlbum._photosCid = data.p;
-        } else {
-          tmpAlbum.photos = [];
-          for (var prop in data.p) {
-            let tmpPhoto = Photo.import(data.p[prop]);
-            if (tmpPhoto == null) {
-              continue;
-            }
-            tmpAlbum.photos.push(tmpPhoto);
+        }
+        
+        tmpAlbum.photos = [];
+        for (var prop in dataResolved.p) {
+          let tmpPhoto = Photo.import(dataResolved.p[prop]);
+          if (tmpPhoto == null) {
+            continue;
           }
-        }        
+          tmpAlbum.photos.push(tmpPhoto);
+        }
       }
     }
     if (data.m != null) {
@@ -330,7 +343,7 @@ define(()=>{
     if (this.albums.length > 0) {
       obj.a = [];
       for (var i = 0; i < this.albums.length; i++) {
-        let exportedAlbum = this.albums[i].export(this._exportAsLinkedNamespace);
+        let exportedAlbum = this.albums[i].export();
         obj.a[i] = exportedAlbum
       }
     }
@@ -344,9 +357,8 @@ define(()=>{
 
     var ls = new libwip2p.LinkedSet();
     ls.address = this.owner;
-    var newDb = this.export();
-    //console.log(newDb)
-    return ls.fetch(this.owner, "/cheese")
+
+    return ls.fetch(this.owner, "/cheese", {dontResolveCids: true})
     .catch((err)=>{
       if (err == 'account has not posted anything' || err == 'path doesnt exist') {
 
@@ -355,24 +367,33 @@ define(()=>{
       }
     })
     .then(()=>{
-      ls.update("/cheese", newDb, {createMissing: true})   
-      if (this._exportAsLinkedNamespace) {
-        ls.linkify("/cheese")
+      let rootAlreadyLinked = false;
+      if (ls.rootNode.content.cheese[Symbol.toStringTag] == "CID") {
+        this._exportAsLinkedNamespace = true;
+        rootAlreadyLinked = true;
       }
-      //console.log(ls)
-      //throw 'stop'
-      return ls.sign()
-    })
-    .then(()=>{
+
       let newPhotoCollectionsToUpload = this.getPendingPhotoCollectionsToUpload();
       for (let a = 0; a < newPhotoCollectionsToUpload.length; a++) {
         ls.addCachedDoc(newPhotoCollectionsToUpload[a]);
       }
 
+      // export the new content
+      var newDb = this.export();      
+      ls.update("/cheese", newDb, {createMissing: true})
+
+      if (this._exportAsLinkedNamespace && !rootAlreadyLinked) {
+        ls.linkify("/cheese")
+      }
+
+      return ls.sign()
+    })
+    .then(()=>{      
       let newPhotosToUpload = this.getPendingPhotosToUpload();
       for (let a = 0; a < newPhotosToUpload.length; a++) {
         ls.addCachedDoc(newPhotosToUpload[a]);
       }
+
       //console.log(ls)
       //throw 'stop'
       return ls.publish();
@@ -403,7 +424,8 @@ define(()=>{
     //console.log(CheeseDb.getNamespace())
 
     let owner = linkedSet.address;
-    let data = linkedSet.getContentByPath(CheeseDb.getNamespace())
+    let data = linkedSet.getContentByPath(CheeseDb.getNamespace(), {dontResolveCids: true})
+    let dataResolved = linkedSet.getContentByPath(CheeseDb.getNamespace(), {dontResolveCids: false})
 
     var db = new CheeseDb();
     db.owner = owner.toLowerCase();
@@ -420,7 +442,7 @@ define(()=>{
       db.albums = [];
     } else {
       for (let a = 0; a < data.a.length; a++) {
-        let tmpAlbum = Album.import(data.a[a]);
+        let tmpAlbum = Album.import(data.a[a], dataResolved.a[a]);
         if (tmpAlbum == null) {
           continue;
         }

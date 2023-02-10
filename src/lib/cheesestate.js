@@ -58,7 +58,7 @@ define([
 
     // attempt to load any linked photocollection docs
     for (let a = 0; a < tmpAlbums.length; a++) {
-      if (tmpAlbums[a]._photosCid != null && tmpAlbums[a].photos == null) {
+      if (tmpAlbums[a]._photosCid != null && tmpAlbums[a]._linkedPhotosFetched == false) {
 
         let tmpCid = tmpAlbums[a]._photosCid.toString();
         //console.log(tmpAlbums[a])
@@ -76,6 +76,7 @@ define([
         if (bFound) {
           Loader.fetchCid(tmpAlbums[a].owner, tmpCid)
           .then((result)=>{
+            tmpAlbums[a]._linkedPhotosFetched = true;
             //console.log(result)
             m.redraw()
           })
