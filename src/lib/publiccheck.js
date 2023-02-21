@@ -1,12 +1,12 @@
 'use strict';
 
 define([
-  'components/publicmodemodal',
-  'lib/loader'
+  'components/publicmodemodal'
 ],(
-  PublicModeModal,
-  Loader
+  PublicModeModal
 )=>{
+
+  const Loader = libwip2p.Loader;
 
   return function() {
 

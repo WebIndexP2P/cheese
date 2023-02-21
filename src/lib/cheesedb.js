@@ -42,12 +42,13 @@ define(()=>{
   Photo.import = function(data) {
     let tmpPhoto = new Photo();
 
-    if (data.c == null) {
-      console.log('skipping photo with missing cid')
-      return;
+    if (data.c == null || data.c[Symbol.toStringTag] != "CID") {
+      //console.log('skipping photo with missing/invalid cid')
+      return
     } else {
       tmpPhoto.cid = data.c;
     }
+
     if (data.t != null) {
       tmpPhoto.title = data.t;
     }
@@ -125,7 +126,7 @@ define(()=>{
   }
 
   Album.prototype.getCoverImageCid = function() {
-    if (this.photos != null && this.photos.length > 0 && this.photos[0] != null && this.photos[0].hasOwnProperty('cid')) {
+    if (this.photos != null && this.photos.length > 0 && this.photos[0] != null && this.photos[0].hasOwnProperty('cid') && 'asCID' in this.photos[0].cid) {
       return this.photos[0].cid;
     } else {
       return null;
@@ -355,10 +356,14 @@ define(()=>{
     if (this.owner == null)
       throw 'no owner set';
 
-    var ls = new libwip2p.LinkedSet();
-    ls.address = this.owner;
+    //var ls = new libwip2p.LinkedSet();
+    //ls.address = this.owner;
 
-    return ls.fetch(this.owner, "/cheese", {dontResolveCids: true})
+    let ls;
+    return libwip2p.Loader.fetchOne(this.owner, {dontResolveCidsInContent: true})
+    .then((result)=>{
+      ls = result.ls;
+    })
     .catch((err)=>{
       if (err == 'account has not posted anything' || err == 'path doesnt exist') {
 
@@ -368,7 +373,7 @@ define(()=>{
     })
     .then(()=>{
       let rootAlreadyLinked = false;
-      if (ls.rootNode.content.cheese[Symbol.toStringTag] == "CID") {
+      if (ls.isPathACid(CheeseDb.getNamespace())) {
         this._exportAsLinkedNamespace = true;
         rootAlreadyLinked = true;
       }
@@ -379,7 +384,7 @@ define(()=>{
       }
 
       // export the new content
-      var newDb = this.export();      
+      var newDb = this.export();
       ls.update("/cheese", newDb, {createMissing: true})
 
       if (this._exportAsLinkedNamespace && !rootAlreadyLinked) {
@@ -394,12 +399,18 @@ define(()=>{
         ls.addCachedDoc(newPhotosToUpload[a]);
       }
 
+      let newDb = CheeseDb.import(ls)
+      libwip2p.Loader.updateDb(this.owner, newDb)
+
+      //console.log(newDb)
       //console.log(ls)
       //throw 'stop'
+
       return ls.publish();
+      //return {result:"ok"}
     })
     .then((response)=>{
-      if (response.result) {
+      if (response.result) {        
         return response.result;
       } else {
         throw response.error;
@@ -409,23 +420,13 @@ define(()=>{
 
   CheeseDb.Album = Album;
 
-  /*CheeseDb.fetch = function(address) {
-    let ls = new libwip2p.LinkedSet();
-    return ls.fetch(address, "/cheese")
-    .then((rawCheeseDb)=>{
-      var db = CheeseDb.import(address, rawCheeseDb)
-      return {appDb: db, linkedSet: ls};
-    })
-  }*/
-
   CheeseDb.import = function(linkedSet) {
     //console.log('CheeseDb.import() -> ')
     //console.log(linkedSet)
-    //console.log(CheeseDb.getNamespace())
 
     let owner = linkedSet.address;
-    let data = linkedSet.getContentByPath(CheeseDb.getNamespace(), {dontResolveCids: true})
-    let dataResolved = linkedSet.getContentByPath(CheeseDb.getNamespace(), {dontResolveCids: false})
+    let data = linkedSet.getContentByPath(CheeseDb.getNamespace(), {dontResolveCidsInContent: true})
+    let dataResolved = linkedSet.getContentByPath(CheeseDb.getNamespace(), {dontResolveCidsInContent: false})
 
     var db = new CheeseDb();
     db.owner = owner.toLowerCase();

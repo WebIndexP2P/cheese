@@ -47,7 +47,7 @@ define([
 
       if (vnode.state.error) {
         if (vnode.attrs.normalizeHeight) {
-          return m("div", {style:"height:100%;", onclick: vnode.attrs.onclick},
+          return m("div", {style:"height:200px;", onclick: vnode.attrs.onclick},
             m("div", {style:"padding-top:50px;text-align:center;width:100%;background:#dddddd;height:100%;color:#999999;"},
               m("i.fa fa-face-grimace", {style:"color:#999999;font-size:30px;width:100%;"}),
               "Image not found"

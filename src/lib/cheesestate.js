@@ -1,15 +1,9 @@
 'use strict';
 
-define([
-  'lib/loader',
-], (
-  Loader
-)=>{
+define(()=>{
 
   var publishers = {} // {}address
   var albums = [] // []albums, sorted by album date
-
-  var linkedDocRequests = {} // {account: {cid: true}}
 
   var process = function(address, cheeseDb) {
     //console.log('process ' + address)
@@ -53,6 +47,9 @@ define([
   }
 
   var getAlbumsPaged = function(page, numPerPage) {
+
+    //console.log('getAlbumsPaged')
+
     let offset = (page - 1) * numPerPage
     let tmpAlbums = albums.slice(offset, offset + numPerPage);
 
@@ -60,27 +57,13 @@ define([
     for (let a = 0; a < tmpAlbums.length; a++) {
       if (tmpAlbums[a]._photosCid != null && tmpAlbums[a]._linkedPhotosFetched == false) {
 
+        tmpAlbums[a]._linkedPhotosFetched = true;
+
         let tmpCid = tmpAlbums[a]._photosCid.toString();
-        //console.log(tmpAlbums[a])
-        let bFound = false;
-        if (linkedDocRequests.hasOwnProperty(tmpAlbums[a].owner)) {
-          if (linkedDocRequests[tmpAlbums[a].owner].hasOwnProperty(tmpCid) == false) {
-            linkedDocRequests[tmpAlbums[a].owner][tmpCid] = true;
-            bFound = true;
-          }
-        } else {
-          linkedDocRequests[tmpAlbums[a].owner] = {}
-          linkedDocRequests[tmpAlbums[a].owner][tmpCid] = true;
-          bFound = true;
-        }
-        if (bFound) {
-          Loader.fetchCid(tmpAlbums[a].owner, tmpCid)
-          .then((result)=>{
-            tmpAlbums[a]._linkedPhotosFetched = true;
-            //console.log(result)
-            m.redraw()
-          })
-        }
+        libwip2p.Loader.fetchCid(tmpAlbums[a].owner, tmpCid)
+        .then((result)=>{
+          m.redraw()
+        })
       }
     }
 

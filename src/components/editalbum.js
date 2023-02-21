@@ -1,20 +1,20 @@
 'use strict';
 
 define([
-  'lib/loader',
   'lib/utils',
   'lib/cheesedb',
   'components/selectableimagegrid',
   'gx/wip2p-settings/src/publishcallback',
   "geoshare/geoshare/src/lib/geosharedb"
 ], (
-  Loader,
   Utils,
   CheeseDb,
   SelectableImageGrid,
   PublishCallback,
   GeoShareDb
 )=>{
+
+  const Loader = libwip2p.Loader;
 
   var resizePhoto = (fileDataB64) => {
     var img = new Image();
@@ -330,9 +330,6 @@ define([
                   }
                   vnode.state.myCheeseDb.publish(libwip2p.Account.getWallet().address)
                   .then((result)=>{
-                    return Loader.fetchOne(libwip2p.Account.getWallet().address, {replaceCache: true});
-                  })
-                  .then((result)=>{
                     m.route.set("/");
                   })
                   .catch((err)=>{
@@ -345,9 +342,6 @@ define([
                       vnode.state.myCheeseDb.deleteAlbum(vnode.state.draftAlbum.id)
                       vnode.state.myCheeseDb.publish(libwip2p.Account.getWallet().address)
                       .then((result)=>{
-                        return Loader.fetchOne(libwip2p.Account.getWallet().address, {replaceCache: true});
-                      })
-                      .then(()=>{
                         m.route.set("/");
                       })
                     }}, m("i.fa fa-trash"), " Delete album")

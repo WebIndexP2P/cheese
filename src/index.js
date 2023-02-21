@@ -11,7 +11,6 @@ define([
   'components/editalbum',
   'components/viewalbum',
   'components/cheesesettings',
-  'lib/loader',
   'lib/cheesedb',
   'lib/cheesestate',
   'lib/publiccheck'
@@ -26,18 +25,19 @@ define([
   PageEditAlbum,
   PageViewAlbum,
   CheeseSettings,
-  Loader,
   CheeseDb,
   CheeseState,
   PublicCheck
 ){
+
+  const libwip2p = window.libwip2p;
+  const Loader = libwip2p.Loader;
 
   MithrilNav.overrideMithrilRouting();
   MithrilNav.restoreScrollPositions();
 
   Loader.setup(CheeseDb, CheeseState);
 
-  var libwip2p = window.libwip2p;
   window.Buffer = libipfs.buffer.Buffer;
   window.Cid = libipfs.multiformats.CID;
 

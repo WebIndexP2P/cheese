@@ -1,18 +1,17 @@
 'use strict';
 
 define([
-  'lib/loader',
   'lib/cheesestate',
   'components/cidimage'
 ],(
-  Loader,
   CheeseState,
   CidImage
 )=>{
 
+  const Loader = libwip2p.Loader;
+
   var renderAlbum = function(vnode, album) {
 
-    //console.log(album)
     //return m("div", album.owner, " ", album.title, album.description, album.date);
 
     return m("div.col-10 col-sm-6 col-md-4 col-lg-3", {key: album.getAlbumId(), style:"margin-bottom:10px;"},
@@ -63,7 +62,7 @@ define([
         newPage = 1;
       }
       vnode.state.page = newPage;
-      vnode.state.pageResults = CheeseState.getAlbumsPaged(vnode.state.page, vnode.state.albumsPerPage);     
+      vnode.state.pageResults = CheeseState.getAlbumsPaged(vnode.state.page, vnode.state.albumsPerPage);
     },
 
     view: (vnode)=>{

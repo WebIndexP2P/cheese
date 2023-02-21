@@ -1,19 +1,19 @@
 'use strict';
 
 define([
-  'lib/loader',
   'lib/cheesedb',
   'components/cidimage',
   'geoshare/geoshare/src/lib/geosharedb',
   'geoshare/geoshare/src/lib/mapstate'
 ], (
-  Loader,
   CheeseDb,
   CidImage,
   GeoShareDb,
   MapState
 )=>{
 
+  const Loader = libwip2p.Loader;
+  
   var loadMapData = function(vnode, address, mapId) {
     let mainFeatureSet;
     return GeoShareDb.fetch(address)
@@ -52,7 +52,7 @@ define([
       Loader.fetchOne(decodedAlbumId.address)
       .then((result)=>{
         vnode.state.targetAlbum = result.db.getAlbumById(targetAlbumId);
-        if (vnode.state.targetAlbum.photos == null) {
+        if (vnode.state.targetAlbum._photosCid != null) {
           Loader.fetchCid(decodedAlbumId.address, vnode.state.targetAlbum._photosCid.toString())
           .then((result)=>{
             Loader.fetchOne(decodedAlbumId.address)

@@ -1,10 +1,8 @@
 'use strict';
 
-define([
-  'lib/loader'
-], (
-  Loader
-)=>{
+define(()=>{
+
+  const Loader = libwip2p.Loader;
 
   var fetch = function(vnode){
     var address = libwip2p.Account.getWallet().address;

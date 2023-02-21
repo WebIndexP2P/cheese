@@ -10,7 +10,17 @@ define(function() {
   var fetch = function(cid) {
 
     if (cid == null || typeof cid == 'object') {
-      throw 'invalid cid'
+      return new Promise((resolve, reject)=>{
+        reject('invalid cid')
+      })
+    }
+
+    try {
+      libipfs.multiformats.CID.parse(cid)
+    } catch(err){
+      return new Promise((resolve, reject)=>{
+        reject('invalid cid')
+      })
     }
 
     if (cache.hasOwnProperty(cid)) {

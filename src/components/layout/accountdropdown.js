@@ -2,13 +2,13 @@
 
 define([
     'gx/ethereum-blockies/blockies.min',
-    'lib/cheesestate',
-    'lib/loader'
+    'lib/cheesestate'
 ], function(
     MakeBlockies,
-    CheeseState,
-    Loader
+    CheeseState
 ) {
+
+    const Loader = libwip2p.Loader;
 
     var showAccount = function(vnode, e) {
 
