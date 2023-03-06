@@ -26,9 +26,9 @@
       "version": "1.0.1"
     },
     {
-      "hash": "QmYJD93JqtGujSBq5TgZtfQtoJevPK4H8ZH4hZ11JuHQLp",
+      "hash": "QmVK7uSj84VFfi4LBvPDHAgTsfTKsDhho2jzBoiRBnr5i3",
       "name": "libwip2p",
-      "version": "0.2.23"
+      "version": "0.2.24"
     },
     {
       "hash": "QmSNHc8eb5KMpNQcD7sqVdLtpWmYTVwfdMC2RDuUB8hhmP",
@@ -39,6 +39,11 @@
       "hash": "QmSBEFqR4udFheAUp1fJ1cWZ9qbr9qs3SDLhuZtWK9SUMt",
       "name": "ethereum-blockies",
       "version": "1.0.2"
+    },
+    {
+      "hash": "QmQpn58hoNrBpAiqDgiKKy9pxPqoFSKo8QyWaAMpN1BPGb",
+      "name": "libgeoshare",
+      "version": "0.0.1"
     }
   ],
   "gxVersion": "0.14.0",
@@ -51,11 +56,12 @@
     "clean": "rimraf build",
     "publish": "ipfs add -r build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "web": "devserver -r src --b 0.0.0.0:7000 -include geoshare/geoshare:../geoshare",
+    "web": "devserver -r src --b 0.0.0.0:7000",
     "web-build": "devserver -b 0.0.0.0:7000 -r build --nogx",
-    "web-dev": "devserver -r src --include geoshare/geoshare:../geoshare,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000",
-    "web-dev2": "devserver -r src --include geoshare/geoshare:../geoshare,gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000"
+    "web-local-geoshare": "devserver -r src --include gx/libgeoshare:../geoshare/src/lib --b 0.0.0.0:7000",
+    "web-local-libwip2p": "devserver -r src --b 0.0.0.0:7000 --include gx/libwip2p:../libwip2p/dist/",
+    "web-local-wip2p-settings-libwip2p": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000"
   },
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
 

@@ -138,6 +138,16 @@ define(()=>{
       throw 'invalid photo index';
     }
     this.photos.splice(idx, 1);
+
+    let photoCollection = [];
+    for (var a = 0; a < this.photos.length; a++) {
+      photoCollection.push(this.photos[a].export())
+    }
+
+    let ls = new libwip2p.LinkedSet();
+    ls.update("/", photoCollection)
+    this._photosCid = ls.rootNode.cid;
+    this._linkedPhotosUpload = true;
   }
 
   Album.prototype.deletePhotoByName = function(name) {

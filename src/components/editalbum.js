@@ -5,7 +5,7 @@ define([
   'lib/cheesedb',
   'components/selectableimagegrid',
   'gx/wip2p-settings/src/publishcallback',
-  "geoshare/geoshare/src/lib/geosharedb"
+  "gx/libgeoshare/geosharedb"
 ], (
   Utils,
   CheeseDb,
@@ -160,7 +160,7 @@ define([
       .then((result)=>{
         if (result.msg == "account not found" || result.db == "account not found") {
           PublishCallback.setOnPublishCallback(function(){
-            Loader.fetchOne(libwip2p.Account.getWallet().address, true)
+            Loader.fetchOne(libwip2p.Account.getWallet().address, {replaceCache: true})
             .then((result)=>{
               m.route.set("/editalbum");
             })

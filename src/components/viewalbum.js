@@ -3,8 +3,8 @@
 define([
   'lib/cheesedb',
   'components/cidimage',
-  'geoshare/geoshare/src/lib/geosharedb',
-  'geoshare/geoshare/src/lib/mapstate'
+  'gx/libgeoshare/geosharedb',
+  'gx/libgeoshare/mapstate'
 ], (
   CheeseDb,
   CidImage,

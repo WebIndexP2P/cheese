@@ -48,7 +48,7 @@ define([
       })
 
       //load our doc to see if any albums
-      Loader.fetchOne(libwip2p.Account.getWallet().address, window.appNamespace)
+      Loader.fetchOne(libwip2p.Account.getWallet().address)
       .catch((err)=>{})
       .then((result)=>{
         Loader.fetchByIndex("cheese_index")

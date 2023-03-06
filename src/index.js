@@ -104,7 +104,9 @@ define([
       libwip2p.Peers.getActivePeerSession()
       .then((ps)=>{
         ps.onBundleReceived = function(bundle){
-          Loader.fetchOne(bundle.account, "/", true);
+          console.log('new bundle received')
+          Loader.fetchOne(bundle.account, {replaceCache: true})
+          .then(()=>m.redraw())
         }
       })
     })
