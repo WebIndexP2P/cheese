@@ -1,5 +1,1 @@
-'use strict';
-
-define(function() {
-    return "0.1.3";
-})
+export default "0.2.0";

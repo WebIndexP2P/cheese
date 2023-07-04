@@ -1,33 +1,27 @@
-'use strict';
+var onReconnectClick = function(e) {
+  e.preventDefault();
 
-define(function(){
+  libwip2p.Peers.connect();
 
-  var onReconnectClick = function(e) {
-    e.preventDefault();
+  var myModal = bootstrap.Modal.getInstance(document.getElementById('modal'));
+  myModal.hide();
+}
 
-    libwip2p.Peers.connect();
+export default {
 
-    var myModal = bootstrap.Modal.getInstance(document.getElementById('modal'));
-    myModal.hide();
+  view: function(vnode) {
+    return [
+        m("div.modal-header",
+        m("h5.modal-title", "Connection lost"),
+        m("button.btn-close", {type:"button", "data-bs-dismiss":"modal"})
+        ),
+        m("div.modal-body",
+          m("p", "The websocket connection to the wip2p peer has disconnected."),
+        ),
+        m("div.modal-footer",
+          m("button.btn btn-primary", {type:"button", onclick: onReconnectClick}, "Reconnect"),
+          m("button.btn btn-secondary", {type:"button", "data-bs-dismiss":"modal"}, "Ignore")
+        )
+    ]
   }
-
-  return {
-
-    view: function(vnode) {
-      return [
-          m("div.modal-header",
-          m("h5.modal-title", "Connection lost"),
-          m("button.btn-close", {type:"button", "data-bs-dismiss":"modal"})
-          ),
-          m("div.modal-body",
-            m("p", "The websocket connection to the wip2p peer has disconnected."),
-          ),
-          m("div.modal-footer",
-            m("button.btn btn-primary", {type:"button", onclick: onReconnectClick}, "Reconnect"),
-            m("button.btn btn-secondary", {type:"button", "data-bs-dismiss":"modal"}, "Ignore")
-          )
-      ]
-    }
-  }
-
-})
+}

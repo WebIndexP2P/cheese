@@ -39,6 +39,8 @@ var filesToCopy = [
     {type:"file", src: "/node_modules/dropzone/dist/dropzone.css", dst: "/npm/dropzone/dist/dropzone.css"},
     {type:"file", src: "/node_modules/dropzone/dist/dropzone-min.js", dst: "/npm/dropzone/dist/dropzone-min.js"},
 
+    {type:"file", src: "/node_modules/qrcode-generator/qrcode.js", dst:"/npm/qrcode-generator/qrcode.js"},
+
     {type:"file", src: "/node_modules/leaflet/dist/leaflet.css", dst:"/npm/leaflet/dist/leaflet.css"},
     {type:"file", src: "/node_modules/leaflet/dist/leaflet.js", dst:"/npm/leaflet/dist/leaflet.js"},
     {type:"file", src: "/node_modules/leaflet/dist/images/marker-icon-2x.png", dst:"/npm/leaflet/dist/images/marker-icon-2x.png"},
@@ -51,51 +53,41 @@ var filesToCopy = [
 
     {type:"file", src: "/node_modules/ethers/dist/ethers.umd.min.js", dst:"/npm/ethers/dist/ethers.umd.min.js"},
 
-    {type:"file", src: "/node_modules/requirejs/require.js", dst: "/npm/requirejs/require.js"},
+    {type:"file", src: "/gx/ethereum-blockies/main.js"},
 
-    {type:"file", src: "/gx/ethereum-blockies/blockies.min.js"},
+    {type:"file", src: "/gx/wip2p-settings/dist/wip2p-settings.iife.min.js"},
 
-    {type:"file", src: "/node_modules/tweetnacl/nacl.min.js", dst:"/npm/tweetnacl/nacl.min.js"},
+    {type:"file", src: "/gx/tweetnacl/nacl-fast.min.js", dst:"/gx/tweetnacl/nacl-fast.min.js"},
 
-    {type:"file", src: "/gx/libwip2p/libwip2p.js"},
+    {type:"file", src: "/gx/libwip2p/libwip2p.iife.min.js"},
 
-    {type:"file", src: "/gx/libipfs/libipfs.min.js"}
+    {type:"file", src: "/gx/libipfs/libipfs.iife.min.js"}
 ]
 
 
 // build the main app AMD file
-var results = exec(rName + ' -o amdbuild.js');
+var results = exec("rollup -c");
 results.stdout.on("data", function(data){
-    console.log(data);
+    process.stdout.write(data)
 })
-results.on('close', function(){
-    console.log('AMD build done.')
+results.stderr.on("data", function(data){
+    process.stdout.write(data)
+})
+results.on('close', function(errCode){
+    if (errCode != 0) {
+        console.error('failed')
+        return;
+    }
+    console.log('Rollup build done.')
     console.log('');
 
-    uglify()
-    .then(renameIndex)
+    renameIndex()
     .then(copyFiles)
-    .then(modifyIndexFile)
-})
-
-var uglify = function() {
-    return new Promise((resolve, reject)=>{
-        var results = exec('node_modules/uglify-es/bin/uglifyjs build/index.js > build/index.min.js');
-        results.stdout.on("data", function(data){
-            console.log(data);
-        })
-        results.on('close', function(){
-            console.log('Uglify done.')
-            console.log('');
-
-            resolve();
-        })
-        results.on("exit", function(code){
-          if (code != 0)
-            reject("uglify exited with code " + code);
-        })
+    .then(replaceImportMap)
+    .catch((err)=>{
+        console.log(err)
     })
-}
+})
 
 var renameIndex = function(){
     return new Promise((resolve, reject)=>{
@@ -160,22 +152,15 @@ var copyFiles = function() {
     })
 }
 
-var modifyIndexFile = function() {
+var replaceImportMap = function(){
+    let indexPath = path.join(buildDir, "index.html");
+    let indexHtml = fs.readFileSync(indexPath).toString();
+    let startPos = indexHtml.indexOf("<script type=\"importmap\">")
+    let endPos = indexHtml.indexOf("</script>", startPos + 10) + 9
 
-    // update index file with version tag cache buster
-    var vContents = fs.readFileSync("src/lib/version.js").toString();
-    var re = /(\d+\.\d+\.\d+)/g
-    var m = vContents.match(re);
-    var appVer;
-    if (m.length == 1) {
-        appVer = m[0];
-    } else {
-        throw new Error("No version number found");
-    }
-    var indexPath = path.join(buildDir, "index.html");
-    var indexHtml = fs.readFileSync(indexPath).toString();
-    indexHtml = indexHtml.replace('"css/app.css"', '"css/app.css?v=' + appVer +'"');
-    indexHtml = indexHtml.replace("//<!--{REPLACEWITH_APPBUNDLE}-->", '"index.js?v=' + appVer +'"');
+    let iifePrefered = "<script>window.iifePrefered = true;</script>"
+
+    indexHtml = indexHtml.substring(0, startPos) + iifePrefered + indexHtml.substring(endPos)
     fs.writeFileSync(indexPath, indexHtml);
-    console.log('index.html substitutions done')
+    console.log('index.html -> importmap removed')
 }

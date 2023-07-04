@@ -36,6 +36,20 @@
         </div>
     </div>
 
+    <script type="importmap">
+        {
+          "imports": {
+            "ethers": "./npm/ethers/dist/ethers.min.js",
+            "tweetnacl": "./gx/tweetnacl/nacl-fast.esm.min.js",
+            "libipfs": "./gx/libipfs/libipfs.min.js",
+            "libwip2p": "./gx/libwip2p/libwip2p.min.js",
+            "wip2p-settings": "./gx/wip2p-settings/src/index.js",
+            "wip2p-settings/": "./gx/wip2p-settings/src/",
+            "ethereum-blockies": "./gx/ethereum-blockies/main.esm.min.js"
+          }
+        }
+    </script>
+
     <script>
 
         function isES6()
@@ -50,61 +64,99 @@
           }
         }
 
-        var addAsset = function(location, callback) {
-            if (location.substring(location.length - 4) == ".css") {
+        var addAsset = function(asset, callback) {    
+            if (asset.type == "css") {
                 var fileref = document.createElement("link");
                 fileref.rel = "stylesheet";
                 fileref.type = "text/css";
-                fileref.href = location;
+                fileref.href = asset.path;
                 document.getElementsByTagName("head")[0].appendChild(fileref)
-
+                assetsLoaded++;
                 callback();
-            } else {
-                var fileref = document.createElement("script");
-                fileref.type = "text/javascript";
-                fileref.src = location;
-                fileref.onload = function(loadEvent) {
-                    callback(location);
+            } else if (asset.type == "iife" || asset.type == 'iife-prefered') {
+            if (asset.type == 'iife-prefered' && (window.hasOwnProperty('iifePrefered') == false || window.iifePrefered == false)) {
+                return callback()
+            }
+            var fileref = document.createElement("script");
+            fileref.type = "text/javascript";
+            fileref.src = asset.path;
+            fileref.onload = function(loadEvent) {
+                assetsLoaded++;
+                callback();
+            }      
+            document.getElementsByTagName("body")[0].appendChild(fileref)
+            } else if (asset.type == "esm") {
+                if (window.iifePrefered != null && window.iifePrefered) {
+                    return callback()
                 }
-                document.getElementsByTagName("body")[0].appendChild(fileref)
+                //import(asset.path)
+                //.then((mod)=>{
+                    assetsLoaded++;
+                    callback()
+                //    setTimeout(()=>callback(), 100);
+                //})
+            } else {
+                throw new Error('unknown asset type')
             }
         }
 
         var assets = [
-            "npm/bootstrap/dist/css/bootstrap.min.css",
-            "npm/@fortawesome/fontawesome-free/css/fontawesome.min.css",
-            "npm/@fortawesome/fontawesome-free/css/solid.min.css",
-            "npm/dropzone/dist/dropzone.css",
-            "npm/leaflet/dist/leaflet.css",
+            {type:"css", path:"./npm/bootstrap/dist/css/bootstrap.min.css"},
+            {type:"css", path:"./npm/@fortawesome/fontawesome-free/css/fontawesome.min.css"},
+            {type:"css", path:"./npm/@fortawesome/fontawesome-free/css/solid.min.css"},
+            {type:"css", path:"./npm/dropzone/dist/dropzone.css"},
+            {type:"css", path:"./npm/leaflet/dist/leaflet.css"},
 
-            "npm/bootstrap/dist/js/bootstrap.bundle.min.js",
-            "npm/dropzone/dist/dropzone-min.js",
-            "npm/mithril/mithril.min.js",
-            "npm/tweetnacl/nacl.min.js",
-            "npm/ethers/dist/ethers.umd.min.js",
-            "npm/fflate/umd/index.js",
-            "npm/leaflet/dist/leaflet.js",
-            "gx/libipfs/libipfs.min.js",
-            "gx/libwip2p/libwip2p.js",
-            "npm/requirejs/require.js",
+            {type:"iife", path:"./npm/bootstrap/dist/js/bootstrap.bundle.min.js"},
+            {type:"iife", path:"./npm/mithril/mithril.min.js"},
+            {type:"iife", path:'./npm/qrcode-generator/qrcode.js'},
+            {type:"iife", path:"./npm/dropzone/dist/dropzone-min.js"},
+            {type:"iife", path:"./npm/fflate/umd/index.js"},
+            {type:"iife", path:"./npm/leaflet/dist/leaflet.js"},
 
-            //<!--{REPLACEWITH_APPBUNDLE}-->
+            {type:"iife-prefered", path:"./npm/ethers/dist/ethers.umd.min.js"},
+            {type:"iife-prefered", path:"./gx/tweetnacl/nacl-fast.min.js"},
+            {type:"iife-prefered", path:"./gx/libipfs/libipfs.iife.min.js"},    
+            {type:"iife-prefered", path:"./gx/libwip2p/libwip2p.iife.min.js"},
+            {type:"iife-prefered", path:"./gx/ethereum-blockies/main.js"},
+            {type:"iife-prefered", path:"./gx/wip2p-settings/dist/wip2p-settings.iife.min.js"},
+
+            /*
+            {type:"esm", path:"./npm/ethers/dist/ethers.min.js"},
+            {type:"esm", path:"./gx/tweetnacl/nacl-fast.esm.min.js"},
+            {type:"esm", path:"./gx/libipfs/libipfs.min.js"},
+            {type:"esm", path:"./gx/libwip2p/libwip2p.min.js"},
+            {type:"esm", path:"./gx/wip2p-settings/src/settings.js"},
+            {type:"esm", path:"./gx/ethereum-blockies/main.esm.min.js"}
+            */
         ]
 
-        document.getElementById('assetTotal').innerText = assets.length;
+        let assetCount = 0;
+        for (let a = 0; a < assets.length;a++){
+            if (assets[a].type == 'iife' || assets[a].type == 'css') {
+            assetCount++;
+            } else if (assets[a].type == 'iife-prefered' && window.iifePrefered != null && iifePrefered) {
+            assetCount++;
+            } else if (assets[a].type == 'esm' && (window.iifePrefered == null || !iifePrefered)) {
+            assetCount++;
+            }
+        }
+        document.getElementById('assetTotal').innerText = assetCount + 1;
 
+        let assetIndex = 0;
+        let assetsLoaded = 0;
         var loaderimg = document.getElementById('apploaderimg');
         loaderimg.onload = function(e) {
             // load all css async
-            // load all js sync, order is important
+            // load all js sync
             var assetIndex = 0;
 
             var onAssetsComplete = function() {
-                requirejs(['index'], function(Index) {})
+                import("./index.js")
             }
             var onLoadComplete = function(location) {
                 assetIndex++;
-                document.getElementById('assetCount').innerText = assetIndex;
+                document.getElementById('assetCount').innerText = assetsLoaded + 1;
                 if (assetIndex < assets.length)
                     addAsset(assets[assetIndex], onLoadComplete);
                 else

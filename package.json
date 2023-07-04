@@ -3,17 +3,17 @@
   "bugs": {},
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.2.1",
-    "bootstrap": "^5.2.3",
+    "bootstrap": "^5.3.0",
     "dropzone": "^6.0.0-beta.2",
-    "ethers": "^5.7.2",
+    "ethers": "^6.6.2",
     "fflate": "^0.7.4",
     "leaflet": "^1.9.3",
     "mithril": "^2.2.2",
-    "requirejs": "^2.3.6",
-    "tweetnacl": "^1.0.3"
+    "qrcode-generator": "^1.4.4"
   },
   "description": "",
   "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.3",
     "mkdirp": "^1.0.4",
     "mv": "^2.1.1",
     "ncp": "^2.0.0",
@@ -21,29 +21,34 @@
   },
   "gxDependencies": [
     {
-      "hash": "QmQF4NV3sSPm7cjMYms4xDgoLwqMXrcz8YyMcdw1N4mKbb",
+      "hash": "QmRv9fMJaXPUSGnw1KQqxEkZbi6oD8bZo2fwAcUL2S9Ujp",
       "name": "libipfs",
-      "version": "1.0.1"
+      "version": "1.1.1"
     },
     {
-      "hash": "QmVK7uSj84VFfi4LBvPDHAgTsfTKsDhho2jzBoiRBnr5i3",
+      "hash": "QmR2N3bHqpqGxAo6o8zo5C8ocM2f7hbXFzBpfg1YL81ym3",
       "name": "libwip2p",
-      "version": "0.2.24"
+      "version": "0.3.6"
     },
     {
-      "hash": "QmSNHc8eb5KMpNQcD7sqVdLtpWmYTVwfdMC2RDuUB8hhmP",
+      "hash": "QmRW3yjDQXZdfdQQQF3UWnDu2k8cfDuomqAWc9u6QYgYER",
       "name": "wip2p-settings",
-      "version": "0.2.1"
+      "version": "0.3.8"
     },
     {
-      "hash": "QmSBEFqR4udFheAUp1fJ1cWZ9qbr9qs3SDLhuZtWK9SUMt",
+      "hash": "QmaEazeuHZeTWdAXjvkBjH5z9AR7Dzpz7aRZSi3DWsfF1v",
       "name": "ethereum-blockies",
-      "version": "1.0.2"
+      "version": "1.0.3"
     },
     {
-      "hash": "QmQpn58hoNrBpAiqDgiKKy9pxPqoFSKo8QyWaAMpN1BPGb",
+      "hash": "QmcuVUJXxD74N7hScpFt5tA1Gn9LwNrWbbNAc9obpraxLn",
       "name": "libgeoshare",
-      "version": "0.0.1"
+      "version": "0.1.1"
+    },
+    {
+      "hash": "QmVwqfnHEL11ZLFRmp5DGz4LdKqwxxUAVPis6ViWTc9ehz",
+      "name": "tweetnacl",
+      "version": "1.0.3"
     }
   ],
   "gxVersion": "0.14.0",
@@ -56,12 +61,12 @@
     "clean": "rimraf build",
     "publish": "ipfs add -r build",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "web": "devserver -r src --b 0.0.0.0:7000",
-    "web-build": "devserver -b 0.0.0.0:7000 -r build --nogx",
-    "web-local-geoshare": "devserver -r src --include gx/libgeoshare:../geoshare/src/lib --b 0.0.0.0:7000",
-    "web-local-libwip2p": "devserver -r src --b 0.0.0.0:7000 --include gx/libwip2p:../libwip2p/dist/",
-    "web-local-wip2p-settings-libwip2p": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7000"
+    "web": "devserver -r src --b 0.0.0.0:7004",
+    "web-build": "devserver -b 0.0.0.0:7004 -r build --nogx",
+    "web-local-geoshare": "devserver -r src --include gx/libgeoshare:../geoshare/src/lib --b 0.0.0.0:7004",
+    "web-local-libwip2p-geoshare": "devserver -r src --b 0.0.0.0:7004 --include gx/libwip2p:../libwip2p/dist/,gx/libgeoshare:../geoshare/src/lib",
+    "web-local-wip2p-settings-libwip2p": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7004"
   },
-  "version": "0.1.3"
+  "version": "0.1.4"
 }
 
