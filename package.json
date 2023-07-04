@@ -26,14 +26,14 @@
       "version": "1.1.1"
     },
     {
-      "hash": "QmR2N3bHqpqGxAo6o8zo5C8ocM2f7hbXFzBpfg1YL81ym3",
+      "hash": "QmZALba63G76osDsK7G5J3dHMzCHptfMBLnqYtxBbJywTd",
       "name": "libwip2p",
-      "version": "0.3.6"
+      "version": "0.3.7"
     },
     {
-      "hash": "QmRW3yjDQXZdfdQQQF3UWnDu2k8cfDuomqAWc9u6QYgYER",
+      "hash": "QmZWLv2sfbhY1jyTMfY5U6KK6bayjkR5GQFrZXLgBXaJmv",
       "name": "wip2p-settings",
-      "version": "0.3.8"
+      "version": "0.3.9"
     },
     {
       "hash": "QmaEazeuHZeTWdAXjvkBjH5z9AR7Dzpz7aRZSi3DWsfF1v",
@@ -64,9 +64,9 @@
     "web": "devserver -r src --b 0.0.0.0:7004",
     "web-build": "devserver -b 0.0.0.0:7004 -r build --nogx",
     "web-local-geoshare": "devserver -r src --include gx/libgeoshare:../geoshare/src/lib --b 0.0.0.0:7004",
-    "web-local-libwip2p-geoshare": "devserver -r src --b 0.0.0.0:7004 --include gx/libwip2p:../libwip2p/dist/,gx/libgeoshare:../geoshare/src/lib",
+    "web-local-libwip2p": "devserver -r src --b 0.0.0.0:7004 --include gx/libwip2p:../libwip2p/dist/",
     "web-local-wip2p-settings-libwip2p": "devserver -r src --include gx/wip2p-settings:../wip2p-settings,gx/libwip2p:../libwip2p/dist/ --b 0.0.0.0:7004"
   },
-  "version": "0.1.4"
+  "version": "0.2.1"
 }
 

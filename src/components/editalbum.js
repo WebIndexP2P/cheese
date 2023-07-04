@@ -4,6 +4,7 @@ import SelectableImageGrid from './selectableimagegrid.js'
 import {PublishCallback} from 'wip2p-settings'
 import GeoShareDb from "../gx/libgeoshare/geosharedb.js"
 import * as libwip2p from 'libwip2p'
+import * as libipfs from 'libipfs'
 
 const Loader = libwip2p.Loader;
 
@@ -102,12 +103,12 @@ var onNewPhoto = async (vnode, file)=>{
 
 var calcCid = async function(fileBuf) {
 
-  let UnixFS = window.libipfs.unixfs.UnixFS;
-  let dagPB = window.libipfs.dagPB;
-  var Sha = window.libipfs.shajs;
-  var CID = window.libipfs.multiformats.CID;
+  let UnixFS = libipfs.unixfs.UnixFS;
+  let dagPB = libipfs.dagPB;
+  let Sha = libipfs.shajs.default;
+  var CID = libipfs.multiformats.CID;
 
-  const sha256 = window.libipfs.multiformats.hasher.from({
+  const sha256 = libipfs.multiformats.hasher.from({
     name: 'sha2-256',
     code: 0x12,
     encode: (input) => Sha('sha256').update(input).digest()
